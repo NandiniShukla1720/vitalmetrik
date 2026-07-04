@@ -2,637 +2,577 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vitalmetrik — Precision Fitness Calculators & Glycemic Index Lookup</title>
-<meta name="description" content="Free BMI, BMR, calorie & body composition calculators plus a searchable glycemic index database. Built by Nandini Shukla.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vitalmetrik — Precision Wellness Calculators</title>
+<meta name="description" content="Free BMI, BMR, body composition calculators and searchable glycemic index. Built by Nandini Shukla.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --forest:#1B2B22;
-  --ink:#15201A;
-  --parchment:#F7F3EA;
-  --parchment-2:#EFE8D8;
-  --coral:#FF6B4A;
-  --coral-dim:#E85A3B;
-  --sage:#8FA888;
-  --sage-dim:#6E8868;
-  --line: rgba(21,32,26,0.12);
-  --line-strong: rgba(21,32,26,0.22);
-  --paper-line: rgba(247,243,234,0.14);
-  --paper-line-strong: rgba(247,243,234,0.26);
-  --serif: 'Source Serif 4', Georgia, serif;
-  --mono: 'JetBrains Mono', 'Courier New', monospace;
-  --sans: 'Inter', -apple-system, sans-serif;
+  --cream:#FBF6F0;--cream2:#F5EDE2;--cream3:#EDE1D2;
+  --blush:#F3DEE2;--blush2:#E8C2C9;--blush3:#D4A0AB;
+  --mauve:#9C7B82;--mauve2:#7A5A62;
+  --sage:#D6E0D3;--sage2:#A8BCA2;--sage3:#6E8868;
+  --gold:#C9A769;--gold2:#A8854A;--gold3:#7A5E30;
+  --lav:#E2DCEF;--lav2:#B6A4CE;--lav3:#8A75AA;
+  --champ:#F0E6D2;
+  --ink:#2E2622;--muted:#6B5D58;--light:#9A8E88;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',-apple-system,sans-serif;
+  --mono:'DM Mono','Courier New',monospace;
+  --female-bg:#FBF6F0;--female-accent:#D4A0AB;--female-accent2:#9C7B82;
+  --male-bg:#F0F4F8;--male-accent:#7A9EB8;--male-accent2:#3D6B8A;
+  --active-bg:var(--female-bg);--active-accent:var(--female-accent);--active-accent2:var(--female-accent2);
+}
+body.male{
+  --active-bg:#F0F4F8;--active-accent:#7A9EB8;--active-accent2:#3D6B8A;
+  --blush:#C8DCF0;--blush2:#A0C0DC;--blush3:#7A9EB8;
+  --mauve:#3D6B8A;--mauve2:#2A4F6A;
+  --sage:#D0E4F0;--sage2:#8AAEC8;--sage3:#4A7A9B;
+  --gold:#7A9EB8;--gold2:#3D6B8A;--gold3:#2A4F6A;
+  --lav:#C8DCF0;--lav2:#8AAEC8;--lav3:#4A7A9B;
+  --champ:#E0EEF8;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{
-  background:var(--parchment);
-  color:var(--ink);
-  font-family:var(--sans);
-  line-height:1.5;
-  overflow-x:hidden;
-}
-@media (prefers-reduced-motion: reduce){
-  html{scroll-behavior:auto;}
-  *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
-}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);line-height:1.6;overflow-x:hidden;transition:background .4s,color .4s;}
 a{color:inherit;text-decoration:none;}
-button{font-family:inherit;cursor:pointer;}
-input,select{font-family:inherit;}
-::selection{background:var(--coral);color:var(--parchment);}
+button,input,select{font-family:inherit;cursor:pointer;}
+::selection{background:var(--blush2);color:var(--ink);}
 
-.wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
-@media (max-width:640px){.wrap{padding:0 20px;}}
-
-/* ── Texture overlay ── */
-.grain{
-  position:fixed; inset:0; pointer-events:none; z-index:9999; opacity:0.035;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+/* ── Gender Gate ── */
+#gate{
+  position:fixed;inset:0;z-index:9999;background:var(--cream);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;padding:40px 20px;transition:opacity .5s,transform .5s;
 }
+#gate.hidden{opacity:0;pointer-events:none;transform:scale(1.04);}
+.gate-logo{display:flex;align-items:center;gap:14px;margin-bottom:40px;}
+.gate-mark{width:44px;height:44px;}
+.gate-wordmark{font-family:var(--serif);font-size:28px;font-weight:500;letter-spacing:.04em;color:var(--ink);}
+.gate-wordmark span{color:var(--gold);}
+.gate-tagline{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:52px;}
+.gate-question{font-family:var(--serif);font-size:clamp(22px,4vw,34px);color:var(--ink);margin-bottom:8px;text-align:center;font-weight:400;font-style:italic;}
+.gate-sub{font-size:13px;color:var(--muted);margin-bottom:40px;text-align:center;}
+.gate-choices{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}
+.gate-btn{
+  width:160px;height:190px;border-radius:16px;border:1.5px solid var(--cream3);
+  background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  transition:all .22s;position:relative;overflow:hidden;
+}
+.gate-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .22s;}
+.gate-btn.female::before{background:radial-gradient(circle at 50% 30%,var(--blush) 0%,transparent 70%);}
+.gate-btn.male::before{background:radial-gradient(circle at 50% 30%,#C8DCF0 0%,transparent 70%);}
+.gate-btn:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 16px 40px -10px rgba(46,38,34,.12);}
+.gate-btn:hover::before{opacity:1;}
+.gate-icon{font-size:40px;position:relative;}
+.gate-btn-label{font-family:var(--serif);font-size:18px;font-weight:500;color:var(--ink);position:relative;}
+.gate-btn-sub{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;position:relative;}
+.gate-deco{position:absolute;border-radius:50%;opacity:.18;}
 
 /* ── Nav ── */
-.nav{
-  position:sticky; top:0; z-index:100;
-  background:rgba(247,243,234,0.92);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--line);
+.nav{position:sticky;top:0;z-index:100;background:rgba(251,246,240,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--cream3);transition:background .4s;}
+body.male .nav{background:rgba(240,244,248,.92);}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:68px;}
+.nav-brand{display:flex;align-items:center;gap:11px;}
+.nav-mark svg{width:32px;height:32px;}
+.nav-wordmark{font-family:var(--serif);font-size:20px;font-weight:500;letter-spacing:.04em;}
+.nav-wordmark span{color:var(--gold2);}
+.nav-links{display:flex;gap:24px;align-items:center;}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:.02em;transition:color .15s;}
+.nav-links a:hover{color:var(--ink);}
+.nav-gender-pill{
+  display:flex;border:1px solid var(--cream3);border-radius:99px;overflow:hidden;
 }
-.nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px;}
-.brand{display:flex;align-items:baseline;gap:8px;}
-.brand-mark{
-  font-family:var(--serif); font-weight:700; font-size:22px; letter-spacing:-0.01em;
-}
-.brand-tag{font-family:var(--mono); font-size:10px; letter-spacing:0.08em; color:var(--sage-dim); text-transform:uppercase;}
-.nav-links{display:flex;gap:28px;align-items:center;}
-.nav-links a{font-size:13.5px; font-weight:500; color:var(--ink); opacity:0.75; transition:opacity .15s;position:relative;}
-.nav-links a:hover{opacity:1;}
-.nav-links a:focus-visible{outline:2px solid var(--coral); outline-offset:4px; border-radius:2px;}
-.nav-cta{
-  background:var(--ink); color:var(--parchment); padding:10px 18px; border-radius:3px;
-  font-size:13px; font-weight:600; letter-spacing:0.01em;
-  border:1px solid var(--ink); transition:all .15s;
-}
-.nav-cta:hover{background:transparent;color:var(--ink);}
-.nav-toggle{display:none; background:none; border:none; font-size:22px; color:var(--ink);}
-@media (max-width:880px){
-  .nav-links{position:fixed; top:72px; left:0; right:0; background:var(--parchment); flex-direction:column; align-items:flex-start; padding:20px 24px; border-bottom:1px solid var(--line); gap:18px; transform:translateY(-150%); transition:transform .25s ease; opacity:1;}
-  .nav-links.open{transform:translateY(0);}
-  .nav-toggle{display:block;}
-  .nav-cta{display:none;}
-}
+.ngp-btn{padding:6px 14px;font-size:12px;font-weight:500;background:transparent;border:none;color:var(--muted);transition:all .2s;letter-spacing:.04em;}
+.ngp-btn.active{background:var(--ink);color:var(--cream);}
+.nav-cta{background:var(--ink);color:var(--cream);padding:9px 18px;border-radius:4px;font-size:13px;font-weight:600;border:none;transition:all .15s;letter-spacing:.02em;}
+.nav-cta:hover{background:var(--gold2);color:#fff;}
+.hamburger{display:none;background:none;border:none;color:var(--ink);font-size:22px;}
+
+/* ── Wrap ── */
+.wrap{max-width:1200px;margin:0 auto;padding:0 32px;}
+@media(max-width:640px){.wrap{padding:0 18px;}}
+
+/* ── Section heads ── */
+.section-eyebrow{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold2);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.section-eyebrow::before{content:'';width:20px;height:1px;background:var(--gold2);}
+.section-head{margin-bottom:52px;max-width:600px;}
+.section-head h2{font-family:var(--serif);font-size:clamp(26px,3.8vw,42px);font-weight:500;line-height:1.1;letter-spacing:-.01em;margin-bottom:12px;}
+.section-head h2 em{font-style:italic;color:var(--mauve);}
+.section-head p{font-size:15px;color:var(--muted);line-height:1.7;}
 
 /* ── Hero ── */
-.hero{
-  position:relative; padding:96px 0 80px; overflow:hidden;
-  border-bottom:1px solid var(--line);
-}
-.hero-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:60px; align-items:center;}
-@media (max-width:880px){.hero-grid{grid-template-columns:1fr; gap:40px;}}
-.eyebrow{
-  font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
-  color:var(--coral-dim); margin-bottom:18px; display:flex; align-items:center; gap:10px;
-}
-.eyebrow::before{content:''; width:24px; height:1px; background:var(--coral-dim);}
-.hero h1{
-  font-family:var(--serif); font-weight:600; font-size:clamp(36px,5.2vw,58px); line-height:1.04;
-  letter-spacing:-0.02em; margin-bottom:22px;
-}
-.hero h1 em{font-style:italic; color:var(--coral-dim);}
-.hero p.lede{font-size:17px; color:rgba(21,32,26,0.72); max-width:480px; margin-bottom:32px; line-height:1.6;}
-.hero-actions{display:flex; gap:14px; flex-wrap:wrap;}
-.btn{
-  display:inline-flex; align-items:center; gap:8px; padding:14px 24px; border-radius:3px;
-  font-size:14px; font-weight:600; letter-spacing:0.01em; transition:all .18s; border:1px solid transparent;
-}
-.btn-primary{background:var(--coral); color:#fff; border-color:var(--coral);}
-.btn-primary:hover{background:var(--coral-dim); border-color:var(--coral-dim); transform:translateY(-1px);}
-.btn-ghost{background:transparent; color:var(--ink); border-color:var(--line-strong);}
-.btn-ghost:hover{border-color:var(--ink); background:var(--ink); color:var(--parchment);}
-.btn:focus-visible{outline:2px solid var(--coral); outline-offset:3px;}
+.hero{padding:88px 0 72px;border-bottom:1px solid var(--cream3);position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:420px;height:420px;border-radius:50%;background:var(--blush);opacity:.3;pointer-events:none;transition:background .4s;}
+.hero::after{content:'';position:absolute;bottom:-60px;left:-40px;width:280px;height:280px;border-radius:50%;background:var(--lav);opacity:.2;pointer-events:none;transition:background .4s;}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:64px;align-items:center;}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:40px;}}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mauve);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--mauve);}
+.hero h1{font-family:var(--serif);font-size:clamp(34px,5vw,60px);font-weight:500;line-height:1.02;letter-spacing:-.02em;margin-bottom:22px;}
+.hero h1 em{font-style:italic;color:var(--mauve);}
+.hero-lede{font-size:16px;color:var(--muted);max-width:480px;margin-bottom:34px;line-height:1.7;}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:4px;font-size:13.5px;font-weight:600;letter-spacing:.02em;transition:all .18s;border:1px solid transparent;}
+.btn-primary{background:var(--ink);color:var(--cream);border-color:var(--ink);}
+.btn-primary:hover{background:var(--gold2);border-color:var(--gold2);transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--cream3);}
+.btn-ghost:hover{border-color:var(--ink);background:var(--ink);color:var(--cream);}
 
-/* Hero readout panel — signature element preview */
-.readout-card{
-  background:var(--ink); border-radius:6px; padding:32px; position:relative;
-  box-shadow:0 30px 60px -20px rgba(21,32,26,0.35);
-}
-.readout-card::before{
-  content:'LIVE READING'; position:absolute; top:18px; right:20px;
-  font-family:var(--mono); font-size:9px; letter-spacing:0.1em; color:var(--sage);
-}
-.readout-label{font-family:var(--mono); font-size:10px; letter-spacing:0.1em; color:rgba(247,243,234,0.5); text-transform:uppercase; margin-bottom:6px;}
-.readout-value{font-family:var(--mono); font-size:64px; font-weight:700; color:var(--parchment); line-height:1; margin-bottom:4px; letter-spacing:-0.02em;}
-.readout-unit{font-family:var(--mono); font-size:13px; color:var(--sage);}
-.readout-sub{display:flex; gap:24px; margin-top:24px; padding-top:24px; border-top:1px solid var(--paper-line);}
-.readout-mini{flex:1;}
-.readout-mini-label{font-family:var(--mono); font-size:9px; color:rgba(247,243,234,0.45); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;}
-.readout-mini-val{font-family:var(--mono); font-size:18px; color:var(--parchment); font-weight:600;}
-.readout-bar{height:4px; background:rgba(247,243,234,0.12); border-radius:2px; margin-top:16px; overflow:hidden;}
-.readout-bar-fill{height:100%; background:linear-gradient(90deg,var(--sage),var(--coral)); width:62%; border-radius:2px;}
+/* Hero panel */
+.hero-panel{background:var(--ink);border-radius:14px;padding:30px;box-shadow:0 28px 56px -18px rgba(46,38,34,.28);position:relative;overflow:hidden;}
+.hero-panel::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:var(--blush2);opacity:.08;}
+.panel-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid rgba(251,246,240,.1);}
+.panel-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(251,246,240,.45);margin-bottom:6px;}
+.panel-value{font-family:var(--mono);font-size:48px;font-weight:500;color:var(--cream);line-height:1;letter-spacing:-.02em;}
+.panel-unit{font-family:var(--mono);font-size:12px;color:var(--sage2);}
+.panel-badge{padding:6px 12px;border-radius:99px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;}
+.badge-normal{background:rgba(166,188,162,.18);color:#A8C5A0;}
+.panel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.panel-mini{padding:14px;background:rgba(251,246,240,.05);border-radius:8px;border:1px solid rgba(251,246,240,.08);}
+.panel-mini .panel-label{margin-bottom:4px;}
+.panel-mini-val{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--cream);}
+.panel-bar{height:3px;background:rgba(251,246,240,.1);border-radius:2px;margin-top:16px;overflow:hidden;}
+.panel-bar-fill{height:100%;width:62%;background:linear-gradient(90deg,var(--sage2),var(--blush2));border-radius:2px;}
 
-/* ── Section scaffolding ── */
+/* ── Sections ── */
 section{padding:88px 0;}
-.section-head{margin-bottom:48px; max-width:640px;}
-.section-num{font-family:var(--mono); font-size:11px; color:var(--coral-dim); letter-spacing:0.1em; margin-bottom:14px;}
-.section-head h2{font-family:var(--serif); font-size:clamp(28px,3.6vw,40px); font-weight:600; letter-spacing:-0.015em; line-height:1.12; margin-bottom:14px;}
-.section-head p{font-size:15.5px; color:rgba(21,32,26,0.65); line-height:1.6;}
-.alt-bg{background:var(--ink); color:var(--parchment);}
-.alt-bg .section-head p{color:rgba(247,243,234,0.65);}
-.alt-bg .section-num{color:var(--sage);}
+.ink-section{background:var(--ink);color:var(--cream);}
+.ink-section .section-eyebrow{color:var(--sage2);}
+.ink-section .section-eyebrow::before{background:var(--sage2);}
+.ink-section .section-head p{color:rgba(251,246,240,.6);}
+.pastel-section{background:var(--blush);transition:background .4s;}
+body.male .pastel-section{background:#E0EEF8;}
 
-/* ── Calculator grid ── */
-.calc-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
-@media (max-width:900px){.calc-grid{grid-template-columns:repeat(2,1fr);}}
-@media (max-width:600px){.calc-grid{grid-template-columns:1fr;}}
-
+/* ── Calculators ── */
+.calc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+@media(max-width:960px){.calc-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:580px){.calc-grid{grid-template-columns:1fr;}}
 .calc-card{
-  background:#fff; border:1px solid var(--line); border-radius:6px; padding:28px;
-  transition:border-color .2s, transform .2s; display:flex; flex-direction:column;
+  background:#fff;border:1px solid var(--cream3);border-radius:12px;padding:26px;
+  transition:border-color .2s,transform .2s,box-shadow .2s;display:flex;flex-direction:column;
 }
-.calc-card:hover{border-color:var(--coral); transform:translateY(-2px);}
-.calc-icon{font-family:var(--mono); font-size:11px; color:var(--coral-dim); margin-bottom:14px; letter-spacing:0.08em;}
-.calc-card h3{font-family:var(--serif); font-size:20px; font-weight:600; margin-bottom:8px;}
-.calc-card .desc{font-size:13px; color:rgba(21,32,26,0.6); margin-bottom:20px; line-height:1.5; flex:1;}
-
-.field-row{display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;}
-.field{flex:1; min-width:90px;}
-.field label{display:block; font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:rgba(21,32,26,0.55); margin-bottom:6px;}
-.field input, .field select{
-  width:100%; padding:10px 11px; border:1px solid var(--line-strong); border-radius:3px;
-  font-size:14px; background:var(--parchment); color:var(--ink); font-family:var(--mono);
+.calc-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 12px 32px -8px rgba(46,38,34,.1);}
+.calc-num{font-family:var(--mono);font-size:10px;color:var(--gold2);letter-spacing:.1em;margin-bottom:12px;}
+.calc-card h3{font-family:var(--serif);font-size:20px;font-weight:500;margin-bottom:6px;}
+.calc-desc{font-size:12.5px;color:var(--muted);margin-bottom:18px;line-height:1.55;flex:1;}
+.fl{display:flex;gap:10px;margin-bottom:11px;flex-wrap:wrap;}
+.f{flex:1;min-width:88px;}
+.f label{display:block;font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--light);margin-bottom:5px;}
+.f input,.f select{
+  width:100%;padding:9px 11px;border:1px solid var(--cream3);border-radius:4px;
+  font-size:13.5px;background:var(--cream);color:var(--ink);font-family:var(--mono);transition:border-color .15s;
 }
-.field input:focus, .field select:focus{outline:none; border-color:var(--coral);}
-.seg{display:flex; border:1px solid var(--line-strong); border-radius:3px; overflow:hidden;}
-.seg button{flex:1; padding:9px 0; background:var(--parchment); border:none; font-size:12px; font-weight:600; color:rgba(21,32,26,0.55); border-right:1px solid var(--line-strong);}
+.f input:focus,.f select:focus{outline:none;border-color:var(--gold);}
+.seg{display:flex;border:1px solid var(--cream3);border-radius:4px;overflow:hidden;margin-bottom:11px;}
+.seg button{flex:1;padding:8px 0;background:var(--cream);border:none;font-size:12px;font-weight:600;color:var(--muted);border-right:1px solid var(--cream3);transition:all .15s;}
 .seg button:last-child{border-right:none;}
-.seg button.active{background:var(--ink); color:var(--parchment);}
-
+.seg button.active{background:var(--ink);color:var(--cream);}
 .calc-btn{
-  margin-top:6px; background:var(--coral); color:#fff; border:none; padding:11px 0; border-radius:3px;
-  font-size:13px; font-weight:700; letter-spacing:0.02em; transition:background .15s;
+  background:var(--ink);color:var(--cream);border:none;padding:10px 0;border-radius:4px;
+  font-size:13px;font-weight:600;letter-spacing:.02em;transition:all .15s;width:100%;margin-top:4px;
 }
-.calc-btn:hover{background:var(--coral-dim);}
-
-.result-box{
-  margin-top:16px; background:var(--ink); border-radius:4px; padding:16px 18px; display:none;
-}
+.calc-btn:hover{background:var(--gold2);}
+.result-box{display:none;margin-top:14px;background:var(--ink);border-radius:8px;padding:14px 16px;}
 .result-box.show{display:block;}
-.result-readout-label{font-family:var(--mono); font-size:9px; color:rgba(247,243,234,0.5); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;}
-.result-readout-value{font-family:var(--mono); font-size:30px; font-weight:700; color:var(--parchment); line-height:1.1;}
-.result-readout-tag{font-family:var(--mono); font-size:11px; color:var(--sage); margin-top:6px;}
-.result-extra{font-size:12px; color:rgba(247,243,234,0.7); margin-top:10px; line-height:1.6;}
+.r-label{font-family:var(--mono);font-size:9px;color:rgba(251,246,240,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.r-value{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--cream);line-height:1.1;}
+.r-tag{font-family:var(--mono);font-size:11px;color:var(--sage2);margin-top:5px;}
+.r-extra{font-size:11.5px;color:rgba(251,246,240,.65);margin-top:8px;line-height:1.6;}
 
-/* ── Glycemic search ── */
-.gi-shell{background:var(--ink); border-radius:8px; padding:36px; color:var(--parchment);}
-.gi-search-row{display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap;}
-.gi-search-row input{
-  flex:1; min-width:220px; padding:16px 18px; border-radius:4px; border:1px solid var(--paper-line-strong);
-  background:rgba(247,243,234,0.06); color:var(--parchment); font-size:15px; font-family:var(--sans);
+/* ── GI Search ── */
+.gi-wrap{background:var(--ink);border-radius:14px;padding:36px;}
+.gi-input{
+  width:100%;padding:16px 20px;border-radius:8px;border:1px solid rgba(251,246,240,.14);
+  background:rgba(251,246,240,.06);color:var(--cream);font-size:15px;font-family:var(--sans);margin-bottom:18px;
 }
-.gi-search-row input::placeholder{color:rgba(247,243,234,0.4);}
-.gi-search-row input:focus{outline:none; border-color:var(--coral);}
-.gi-filters{display:flex; gap:8px; flex-wrap:wrap;}
-.gi-filter-chip{
-  padding:7px 14px; border-radius:99px; border:1px solid var(--paper-line-strong); background:transparent;
-  color:rgba(247,243,234,0.7); font-size:12px; font-weight:500; transition:all .15s;
-}
-.gi-filter-chip.active{background:var(--coral); border-color:var(--coral); color:#fff;}
-.gi-meta{font-family:var(--mono); font-size:11px; color:rgba(247,243,234,0.45); margin-bottom:14px; letter-spacing:0.04em;}
-.gi-results{max-height:560px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:6px;}
-.gi-results::-webkit-scrollbar{width:6px;}
-.gi-results::-webkit-scrollbar-thumb{background:rgba(247,243,234,0.2); border-radius:3px;}
+.gi-input::placeholder{color:rgba(251,246,240,.35);}
+.gi-input:focus{outline:none;border-color:var(--gold);}
+.gi-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.gi-chip{padding:6px 14px;border-radius:99px;border:1px solid rgba(251,246,240,.18);background:transparent;color:rgba(251,246,240,.65);font-size:11.5px;font-weight:500;transition:all .15s;}
+.gi-chip.active{background:var(--gold);border-color:var(--gold);color:var(--ink);}
+.gi-meta{font-family:var(--mono);font-size:10px;color:rgba(251,246,240,.4);letter-spacing:.04em;margin-bottom:14px;}
+.gi-list{max-height:540px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:4px;}
+.gi-list::-webkit-scrollbar{width:5px;}
+.gi-list::-webkit-scrollbar-thumb{background:rgba(251,246,240,.18);border-radius:3px;}
 .gi-row{
-  display:grid; grid-template-columns:1fr 90px 90px 100px; align-items:center; gap:14px;
-  padding:14px 16px; background:rgba(247,243,234,0.04); border-radius:4px; border:1px solid transparent;
-  transition:all .15s;
+  display:grid;grid-template-columns:1fr 76px 76px 90px;align-items:center;gap:12px;
+  padding:12px 14px;background:rgba(251,246,240,.04);border-radius:6px;border:1px solid transparent;
+  transition:all .15s;cursor:default;
 }
-.gi-row:hover{background:rgba(247,243,234,0.08); border-color:var(--paper-line-strong);}
-@media (max-width:680px){.gi-row{grid-template-columns:1fr; gap:6px;}}
-.gi-name{font-size:14px; font-weight:600;}
-.gi-cat{font-family:var(--mono); font-size:10px; color:rgba(247,243,234,0.45); margin-top:2px;}
-.gi-val{text-align:center;}
-.gi-val-num{font-family:var(--mono); font-size:16px; font-weight:700;}
-.gi-val-label{font-family:var(--mono); font-size:8px; color:rgba(247,243,234,0.4); text-transform:uppercase;}
-.gi-badge{
-  font-family:var(--mono); font-size:10px; font-weight:700; padding:4px 10px; border-radius:99px; text-align:center;
-  letter-spacing:0.04em;
-}
-.gi-badge.low{background:rgba(143,168,136,0.2); color:#A8C5A0;}
-.gi-badge.med{background:rgba(255,180,80,0.18); color:#FFC470;}
-.gi-badge.high{background:rgba(255,107,74,0.18); color:#FF8C6E;}
-.gi-empty{padding:40px 20px; text-align:center; color:rgba(247,243,234,0.5); font-size:13px;}
+.gi-row:hover{background:rgba(251,246,240,.08);border-color:rgba(251,246,240,.12);}
+@media(max-width:600px){.gi-row{grid-template-columns:1fr;gap:4px;}}
+.gi-name{font-size:13.5px;font-weight:600;}
+.gi-cat{font-family:var(--mono);font-size:9.5px;color:rgba(251,246,240,.4);margin-top:2px;}
+.gi-num{text-align:center;}
+.gi-num-val{font-family:var(--mono);font-size:15px;font-weight:500;}
+.gi-num-lbl{font-family:var(--mono);font-size:8px;color:rgba(251,246,240,.35);text-transform:uppercase;}
+.gi-pill{font-family:var(--mono);font-size:9.5px;font-weight:700;padding:4px 10px;border-radius:99px;text-align:center;letter-spacing:.04em;}
+.gi-pill.low{background:rgba(143,188,136,.2);color:#A8D4A0;}
+.gi-pill.med{background:rgba(255,185,80,.16);color:#FFD070;}
+.gi-pill.high{background:rgba(220,100,80,.18);color:#FF9070;}
+.gi-empty{padding:40px;text-align:center;color:rgba(251,246,240,.4);font-size:13px;}
 
-/* ── Body composition ── */
-.bodycomp-grid{display:grid; grid-template-columns:1fr 1fr; gap:28px;}
-@media (max-width:880px){.bodycomp-grid{grid-template-columns:1fr;}}
-.bc-form{background:#fff; border:1px solid var(--line); border-radius:6px; padding:32px;}
-.bc-form h3{font-family:var(--serif); font-size:21px; font-weight:600; margin-bottom:6px;}
-.bc-form .sub{font-size:13px; color:rgba(21,32,26,0.6); margin-bottom:22px;}
-.bc-results{background:var(--ink); border-radius:6px; padding:32px; color:var(--parchment); display:flex; flex-direction:column;}
-.bc-results h3{font-family:var(--serif); font-size:21px; font-weight:600; margin-bottom:18px;}
-.bc-metric{display:flex; justify-content:space-between; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--paper-line);}
+/* ── Body Comp ── */
+.bc-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media(max-width:860px){.bc-grid{grid-template-columns:1fr;}}
+.bc-form{background:#fff;border:1px solid var(--cream3);border-radius:12px;padding:30px;}
+.bc-form h3{font-family:var(--serif);font-size:21px;font-weight:500;margin-bottom:6px;}
+.bc-form .sub{font-size:12.5px;color:var(--muted);margin-bottom:20px;}
+.bc-panel{background:var(--ink);border-radius:12px;padding:30px;color:var(--cream);}
+.bc-panel h3{font-family:var(--serif);font-size:21px;font-weight:500;margin-bottom:20px;}
+.bc-metric{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px solid rgba(251,246,240,.08);}
 .bc-metric:last-of-type{border-bottom:none;}
-.bc-metric-label{font-size:13px; color:rgba(247,243,234,0.7);}
-.bc-metric-value{font-family:var(--mono); font-size:18px; font-weight:700;}
-.bc-placeholder{flex:1; display:flex; align-items:center; justify-content:center; text-align:center; color:rgba(247,243,234,0.4); font-size:13px; padding:30px 10px;}
-.bc-goal-tag{display:inline-block; margin-top:18px; padding:10px 16px; background:var(--coral); color:#fff; border-radius:4px; font-size:12.5px; font-weight:600; text-align:center;}
+.bc-metric-lbl{font-size:12.5px;color:rgba(251,246,240,.65);}
+.bc-metric-val{font-family:var(--mono);font-size:17px;font-weight:500;}
+.bc-placeholder{display:flex;align-items:center;justify-content:center;text-align:center;color:rgba(251,246,240,.35);font-size:13px;padding:60px 20px;flex:1;}
+.bc-goal-chip{display:inline-block;margin-top:18px;padding:9px 16px;background:var(--gold);color:var(--ink);border-radius:4px;font-size:12px;font-weight:600;text-align:center;}
 
-/* ── Routine generator ── */
-.routine-output{margin-top:28px; display:none;}
+/* ── Routines ── */
+.routine-output{margin-top:28px;display:none;}
 .routine-output.show{display:block;}
+.routine-head{font-family:var(--serif);font-size:20px;font-weight:500;color:var(--cream);margin-bottom:18px;}
 .routine-day{
-  background:#fff; border:1px solid var(--line); border-radius:6px; padding:20px 22px; margin-bottom:10px;
-  display:grid; grid-template-columns:120px 1fr; gap:18px; align-items:start;
+  display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:start;
+  background:rgba(251,246,240,.04);border:1px solid rgba(251,246,240,.1);border-radius:8px;
+  padding:16px 18px;margin-bottom:8px;
 }
-@media (max-width:600px){.routine-day{grid-template-columns:1fr; gap:8px;}}
-.routine-day-label{font-family:var(--mono); font-size:12px; font-weight:700; color:var(--coral-dim); text-transform:uppercase; letter-spacing:0.04em;}
-.routine-day-content .focus{font-weight:700; font-size:14.5px; margin-bottom:6px;}
-.routine-day-content .moves{font-size:13px; color:rgba(21,32,26,0.65); line-height:1.6;}
+@media(max-width:560px){.routine-day{grid-template-columns:1fr;gap:6px;}}
+.rd-day{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;}
+.rd-focus{font-size:14px;font-weight:600;color:var(--cream);margin-bottom:4px;}
+.rd-moves{font-size:12.5px;color:rgba(251,246,240,.6);line-height:1.6;}
 
-/* ── Pricing / subscription ── */
-.price-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
-@media (max-width:780px){.price-grid{grid-template-columns:1fr;}}
-.price-card{background:#fff; border:1px solid var(--line); border-radius:8px; padding:36px;}
-.price-card.featured{background:var(--ink); color:var(--parchment); position:relative; overflow:hidden;}
-.price-card.featured::before{content:'PREMIUM'; position:absolute; top:20px; right:-32px; background:var(--coral); color:#fff; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:0.1em; padding:5px 40px; transform:rotate(45deg);}
-.price-tier{font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--coral-dim); margin-bottom:10px;}
-.price-card.featured .price-tier{color:var(--sage);}
-.price-card h3{font-family:var(--serif); font-size:26px; font-weight:600; margin-bottom:8px;}
-.price-amt{font-family:var(--mono); font-size:36px; font-weight:700; margin:18px 0 6px;}
-.price-amt span{font-size:14px; font-weight:500; opacity:0.6;}
-.price-list{list-style:none; margin:24px 0; display:flex; flex-direction:column; gap:12px;}
-.price-list li{font-size:13.5px; display:flex; gap:10px; align-items:flex-start; line-height:1.5;}
-.price-list li::before{content:'—'; color:var(--coral-dim); flex-shrink:0;}
-.price-card.featured .price-list li::before{color:var(--coral);}
-
-/* ── About / credentials ── */
-.about-grid{display:grid; grid-template-columns:280px 1fr; gap:48px; align-items:start;}
-@media (max-width:780px){.about-grid{grid-template-columns:1fr;}}
-.about-card{background:#fff; border:1px solid var(--line); border-radius:8px; padding:32px; text-align:center;}
-.about-avatar{
-  width:96px; height:96px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(135deg,var(--sage),var(--coral));
-  display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:32px; font-weight:700; color:#fff;
+/* ── Pricing ── */
+.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+@media(max-width:720px){.price-grid{grid-template-columns:1fr;}}
+.price-card{background:#fff;border:1px solid var(--cream3);border-radius:12px;padding:34px;}
+.price-card.feat{background:var(--ink);color:var(--cream);position:relative;overflow:hidden;}
+.price-card.feat::after{
+  content:'ATELIER';position:absolute;top:22px;right:-26px;
+  background:var(--gold);color:var(--ink);font-family:var(--mono);font-size:8.5px;font-weight:700;
+  letter-spacing:.1em;padding:5px 34px;transform:rotate(45deg);
 }
-.about-name{font-family:var(--serif); font-size:21px; font-weight:600; margin-bottom:4px;}
-.about-role{font-size:12.5px; color:var(--coral-dim); font-weight:600; margin-bottom:18px;}
-.about-contact{display:flex; flex-direction:column; gap:8px; margin-top:18px; padding-top:18px; border-top:1px solid var(--line);}
-.about-contact a{font-size:12.5px; font-family:var(--mono); color:rgba(21,32,26,0.7); transition:color .15s;}
-.about-contact a:hover{color:var(--coral-dim);}
-.about-body p{font-size:15px; line-height:1.75; color:rgba(21,32,26,0.75); margin-bottom:16px;}
-.about-creds{display:flex; flex-wrap:wrap; gap:10px; margin-top:20px;}
-.cred-pill{font-family:var(--mono); font-size:11px; padding:7px 13px; background:var(--parchment-2); border-radius:99px; border:1px solid var(--line);}
+.price-tier{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold2);margin-bottom:10px;}
+.price-card.feat .price-tier{color:var(--sage2);}
+.price-card h3{font-family:var(--serif);font-size:26px;font-weight:500;margin-bottom:8px;}
+.price-amt{font-family:var(--mono);font-size:34px;font-weight:500;margin:18px 0 6px;}
+.price-amt span{font-size:13px;font-weight:400;opacity:.55;}
+.price-list{list-style:none;margin:22px 0;display:flex;flex-direction:column;gap:11px;}
+.price-list li{font-size:13.5px;display:flex;gap:9px;line-height:1.55;}
+.price-list li::before{content:'—';color:var(--gold);flex-shrink:0;}
+
+/* ── About ── */
+.about-grid{display:grid;grid-template-columns:260px 1fr;gap:44px;align-items:start;}
+@media(max-width:760px){.about-grid{grid-template-columns:1fr;}}
+.about-card{background:#fff;border:1px solid var(--cream3);border-radius:12px;padding:30px;text-align:center;}
+.about-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 16px;background:linear-gradient(135deg,var(--blush2),var(--gold));display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:26px;font-weight:500;color:#fff;}
+.about-name{font-family:var(--serif);font-size:20px;font-weight:500;margin-bottom:3px;}
+.about-role{font-size:12px;color:var(--mauve);font-weight:600;margin-bottom:16px;letter-spacing:.04em;text-transform:uppercase;}
+.about-divider{height:1px;background:var(--cream3);margin-bottom:16px;}
+.about-contact a{display:block;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:8px;transition:color .15s;}
+.about-contact a:hover{color:var(--gold2);}
+.about-body p{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:14px;}
+.cred-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
+.cred-chip{font-family:var(--mono);font-size:10.5px;padding:6px 12px;background:var(--cream2);border-radius:99px;border:1px solid var(--cream3);}
 
 /* ── Footer ── */
-footer{background:var(--ink); color:var(--parchment); padding:56px 0 28px;}
-.footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:40px; padding-bottom:36px; border-bottom:1px solid var(--paper-line);}
-@media (max-width:680px){.footer-grid{grid-template-columns:1fr; gap:28px;}}
-.footer-brand{font-family:var(--serif); font-size:22px; font-weight:700; margin-bottom:10px;}
-.footer-tag{font-size:13px; color:rgba(247,243,234,0.55); max-width:300px; line-height:1.6;}
-.footer-col h4{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:rgba(247,243,234,0.45); margin-bottom:14px;}
-.footer-col a{display:block; font-size:13.5px; color:rgba(247,243,234,0.75); margin-bottom:10px; transition:color .15s;}
-.footer-col a:hover{color:var(--coral);}
-.footer-bottom{display:flex; justify-content:space-between; align-items:center; padding-top:24px; flex-wrap:wrap; gap:10px;}
-.footer-bottom span{font-size:12px; color:rgba(247,243,234,0.4); font-family:var(--mono);}
+footer{background:var(--ink);color:var(--cream);padding:56px 0 28px;}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px;padding-bottom:36px;border-bottom:1px solid rgba(251,246,240,.1);}
+@media(max-width:640px){.footer-grid{grid-template-columns:1fr;gap:26px;}}
+.footer-brand{font-family:var(--serif);font-size:21px;font-weight:500;margin-bottom:10px;}
+.footer-brand span{color:var(--gold);}
+.footer-tag{font-size:13px;color:rgba(251,246,240,.5);max-width:280px;line-height:1.65;}
+.footer-col h4{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:rgba(251,246,240,.4);margin-bottom:14px;}
+.footer-col a{display:block;font-size:13px;color:rgba(251,246,240,.7);margin-bottom:9px;transition:color .15s;}
+.footer-col a:hover{color:var(--gold);}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:22px;flex-wrap:wrap;gap:8px;}
+.footer-bottom span{font-size:11.5px;color:rgba(251,246,240,.35);font-family:var(--mono);}
 
-/* Skip link */
-.skip-link{position:absolute; left:-999px; top:0; background:var(--coral); color:#fff; padding:10px 16px; z-index:10000;}
-.skip-link:focus{left:16px; top:16px;}
+/* ── Decorative grain ── */
+.grain{position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* ── Divider ornament ── */
+.ornament{display:flex;align-items:center;gap:12px;justify-content:center;padding:12px 0;opacity:.45;}
+.ornament::before,.ornament::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2));}
+.ornament::after{background:linear-gradient(90deg,var(--gold2),transparent);}
+.diamond{width:6px;height:6px;background:var(--gold2);transform:rotate(45deg);}
+
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--gold);color:#fff;padding:8px 16px;z-index:10000;}
+.skip-link:focus{left:16px;top:16px;}
+
+@media(max-width:880px){
+  .nav-links{position:fixed;top:68px;left:0;right:0;background:var(--cream);flex-direction:column;align-items:flex-start;padding:18px 24px;border-bottom:1px solid var(--cream3);gap:16px;transform:translateY(-130%);transition:transform .25s;opacity:1;z-index:99;}
+  .nav-links.open{transform:translateY(0);}
+  .hamburger{display:block;}
+  .nav-cta{display:none;}
+}
 </style>
 </head>
 <body>
+
+<!-- Gender Gate -->
+<div id="gate">
+  <div style="position:absolute;top:60px;right:80px;width:320px;height:320px;border-radius:50%;background:var(--blush);opacity:.3;pointer-events:none;"></div>
+  <div style="position:absolute;bottom:40px;left:60px;width:200px;height:200px;border-radius:50%;background:var(--lav);opacity:.2;pointer-events:none;"></div>
+
+  <div class="gate-logo">
+    <svg class="gate-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="22" cy="22" r="20" fill="#F3DEE2" stroke="#C9A769" stroke-width="1.2"/>
+      <circle cx="22" cy="22" r="17" fill="none" stroke="#C9A769" stroke-width="0.5" stroke-dasharray="2.5 3.5"/>
+      <polyline points="5,22 10,22 14,12 18,32 22,16 26,26 30,22 39,22" fill="none" stroke="#C9A769" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="22" cy="16" r="2" fill="#C9A769"/>
+    </svg>
+    <div class="gate-wordmark">Vital<span>metrik</span></div>
+  </div>
+
+  <div class="gate-tagline">Precision Wellness Calculators</div>
+
+  <div class="gate-question">Who are we calibrating for?</div>
+  <div class="gate-sub">Your tools, colours, and plan adapt to your selection.</div>
+
+  <div class="gate-choices">
+    <button class="gate-btn female" onclick="chooseGender('female')" aria-label="Select female">
+      <div class="gate-icon">🌸</div>
+      <div class="gate-btn-label">Female</div>
+      <div class="gate-btn-sub">Her body, her rhythm</div>
+    </button>
+    <button class="gate-btn male" onclick="chooseGender('male')" aria-label="Select male">
+      <div class="gate-icon">⚡</div>
+      <div class="gate-btn-label">Male</div>
+      <div class="gate-btn-sub">Built for him</div>
+    </button>
+  </div>
+</div>
+
 <div class="grain" aria-hidden="true"></div>
 <a class="skip-link" href="#main">Skip to content</a>
 
+<!-- Nav -->
 <nav class="nav">
-  <div class="wrap nav-inner">
-    <div class="brand">
-      <span class="brand-mark">Vitalmetrik</span>
-    </div>
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="nav-mark">
+        <svg viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="14.5" fill="var(--blush)" stroke="var(--gold)" stroke-width="1"/>
+          <polyline points="4,16 8,16 11,9 14,23 16.5,12 19,20 22,16 28,16" fill="none" stroke="var(--gold2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="nav-wordmark">Vital<span>metrik</span></span>
+    </a>
+    <button class="hamburger" id="ham" aria-label="Menu" aria-expanded="false">☰</button>
     <div class="nav-links" id="navLinks">
       <a href="#calculators">Calculators</a>
       <a href="#glycemic">Glycemic Index</a>
-      <a href="#bodycomp">Body Composition</a>
+      <a href="#bodycomp">Body Comp</a>
       <a href="#routines">Routines</a>
       <a href="#pricing">Premium</a>
       <a href="#about">About</a>
-      <a href="#about" class="nav-cta">Get Premium PDF</a>
+      <div class="nav-gender-pill">
+        <button class="ngp-btn active" id="ngp-f" onclick="switchGender('female')">♀ Female</button>
+        <button class="ngp-btn" id="ngp-m" onclick="switchGender('male')">♂ Male</button>
+      </div>
+      <button class="nav-cta" onclick="location.href='#pricing'">Get Premium PDF</button>
     </div>
   </div>
 </nav>
 
 <main id="main">
 
-<!-- ───────────── HERO ───────────── -->
+<!-- ── HERO ── -->
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
-      <div class="eyebrow">Free precision fitness tools</div>
-      <h1>Read your body like an <em>instrument panel.</em></h1>
-      <p class="lede">BMI, BMR, calorie needs, body composition, and a searchable glycemic index of 150+ foods — every number explained, nothing locked behind a paywall except the deep-dive extras.</p>
+      <div class="hero-eyebrow" id="hero-eyebrow">Calibrated for her</div>
+      <h1 id="hero-h1">Read your body like an <em>instrument panel.</em></h1>
+      <p class="hero-lede" id="hero-lede">Every essential wellness number — BMI, BMR, body fat, glycemic load, macros — explained in one place. Free, precise, and built for real life.</p>
       <div class="hero-actions">
         <a href="#calculators" class="btn btn-primary">Open the calculators →</a>
         <a href="#glycemic" class="btn btn-ghost">Search glycemic index</a>
       </div>
     </div>
-    <div class="readout-card">
-      <div class="readout-label">Basal Metabolic Rate</div>
-      <div class="readout-value">1,412</div>
-      <div class="readout-unit">kcal / day at rest</div>
-      <div class="readout-bar"><div class="readout-bar-fill"></div></div>
-      <div class="readout-sub">
-        <div class="readout-mini">
-          <div class="readout-mini-label">BMI</div>
-          <div class="readout-mini-val">21.4</div>
+    <div class="hero-panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-label">Basal Metabolic Rate</div>
+          <div class="panel-value">1,412</div>
+          <div class="panel-unit">kcal / day at rest</div>
         </div>
-        <div class="readout-mini">
-          <div class="readout-mini-label">TDEE</div>
-          <div class="readout-mini-val">1,940</div>
-        </div>
-        <div class="readout-mini">
-          <div class="readout-mini-label">Status</div>
-          <div class="readout-mini-val" style="color:#A8C5A0;">Normal</div>
-        </div>
+        <span class="panel-badge badge-normal">Normal</span>
+      </div>
+      <div class="panel-bar"><div class="panel-bar-fill"></div></div>
+      <div class="panel-grid" style="margin-top:18px;">
+        <div class="panel-mini"><div class="panel-label">BMI</div><div class="panel-mini-val">21.4</div></div>
+        <div class="panel-mini"><div class="panel-label">TDEE</div><div class="panel-mini-val">1,940</div></div>
+        <div class="panel-mini"><div class="panel-label">Body fat</div><div class="panel-mini-val" style="color:var(--sage2);">24.1%</div></div>
       </div>
     </div>
   </div>
 </header>
 
-<!-- ───────────── CALCULATORS ───────────── -->
+<!-- ── CALCULATORS ── -->
 <section id="calculators">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-num">01 — Core calculators</div>
-      <h2>Every essential number, in one place.</h2>
-      <p>Each calculator gives you an instant reading plus the context to understand what it means for your goals.</p>
+      <div class="section-eyebrow">01 — Core calculators</div>
+      <h2>Every number. <em>One place.</em></h2>
+      <p>Six essential calculators, each giving you an instant reading plus the context to know what it means for your goals.</p>
     </div>
-
     <div class="calc-grid">
 
       <!-- BMI -->
       <div class="calc-card">
-        <div class="calc-icon">BMI · 01</div>
+        <div class="calc-num">BMI · 01</div>
         <h3>Body Mass Index</h3>
-        <p class="desc">Weight relative to height — a quick population-level screening number.</p>
-        <div class="seg" id="bmiUnit">
-          <button class="active" data-u="metric">Metric</button>
-          <button data-u="imperial">Imperial</button>
-        </div>
-        <div class="field-row" style="margin-top:12px;">
-          <div class="field"><label>Height (cm)</label><input type="number" id="bmiHeight" placeholder="160" inputmode="decimal"></div>
-          <div class="field"><label>Weight (kg)</label><input type="number" id="bmiWeight" placeholder="55" inputmode="decimal"></div>
-        </div>
+        <p class="calc-desc">Weight relative to height — a quick population-level screening number.</p>
+        <div class="seg" id="bmiUnitSeg"><button class="active" data-v="metric">Metric</button><button data-v="imperial">Imperial</button></div>
+        <div class="fl"><div class="f"><label>Height (cm)</label><input type="number" id="bh" placeholder="160" inputmode="decimal"></div><div class="f"><label>Weight (kg)</label><input type="number" id="bw" placeholder="55" inputmode="decimal"></div></div>
         <button class="calc-btn" onclick="calcBMI()">Calculate BMI</button>
-        <div class="result-box" id="bmiResult">
-          <div class="result-readout-label">Your BMI</div>
-          <div class="result-readout-value" id="bmiVal">—</div>
-          <div class="result-readout-tag" id="bmiTag">—</div>
-        </div>
+        <div class="result-box" id="bmiRes"><div class="r-label">Your BMI</div><div class="r-value" id="bmiVal">—</div><div class="r-tag" id="bmiTag">—</div></div>
       </div>
 
       <!-- BMR -->
       <div class="calc-card">
-        <div class="calc-icon">BMR · 02</div>
+        <div class="calc-num">BMR · 02</div>
         <h3>Basal Metabolic Rate</h3>
-        <p class="desc">Calories your body burns at complete rest, using the Mifflin-St Jeor equation.</p>
-        <div class="seg" id="bmrSex">
-          <button class="active" data-s="female">Female</button>
-          <button data-s="male">Male</button>
-        </div>
-        <div class="field-row" style="margin-top:12px;">
-          <div class="field"><label>Age</label><input type="number" id="bmrAge" placeholder="24" inputmode="numeric"></div>
-          <div class="field"><label>Height (cm)</label><input type="number" id="bmrHeight" placeholder="160" inputmode="decimal"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Weight (kg)</label><input type="number" id="bmrWeight" placeholder="55" inputmode="decimal"></div>
-        </div>
+        <p class="calc-desc">Calories your body burns at complete rest — Mifflin-St Jeor equation.</p>
+        <div class="seg" id="bmrSexSeg"><button class="active" data-v="female">Female</button><button data-v="male">Male</button></div>
+        <div class="fl"><div class="f"><label>Age</label><input type="number" id="ba" placeholder="24" inputmode="numeric"></div><div class="f"><label>Height (cm)</label><input type="number" id="bmrH" placeholder="160" inputmode="decimal"></div></div>
+        <div class="fl"><div class="f"><label>Weight (kg)</label><input type="number" id="bmrW" placeholder="55" inputmode="decimal"></div></div>
         <button class="calc-btn" onclick="calcBMR()">Calculate BMR</button>
-        <div class="result-box" id="bmrResultBox">
-          <div class="result-readout-label">Calories at rest</div>
-          <div class="result-readout-value" id="bmrVal">—</div>
-          <div class="result-readout-tag">kcal / day</div>
-        </div>
+        <div class="result-box" id="bmrRes"><div class="r-label">Calories at rest</div><div class="r-value" id="bmrVal">—</div><div class="r-tag">kcal / day</div></div>
       </div>
 
-      <!-- TDEE / Calorie counter -->
+      <!-- TDEE -->
       <div class="calc-card">
-        <div class="calc-icon">TDEE · 03</div>
+        <div class="calc-num">TDEE · 03</div>
         <h3>Daily Calorie Needs</h3>
-        <p class="desc">Total energy expenditure including activity — your maintenance calorie target.</p>
-        <div class="field">
-          <label>Activity level</label>
-          <select id="tdeeActivity">
-            <option value="1.2">Sedentary (little/no exercise)</option>
-            <option value="1.375">Light (1-3 days/week)</option>
-            <option value="1.55" selected>Moderate (3-5 days/week)</option>
-            <option value="1.725">Active (6-7 days/week)</option>
-            <option value="1.9">Very active (athlete)</option>
-          </select>
-        </div>
-        <p style="font-size:11.5px; color:rgba(21,32,26,0.5); margin-top:10px;">Uses your BMR from above — calculate BMR first.</p>
+        <p class="calc-desc">Total daily energy expenditure including your activity level.</p>
+        <div class="f" style="margin-bottom:11px;"><label>Activity level</label><select id="tdeeAct"><option value="1.2">Sedentary (little/no exercise)</option><option value="1.375">Light (1–3 days/week)</option><option value="1.55" selected>Moderate (3–5 days/week)</option><option value="1.725">Active (6–7 days/week)</option><option value="1.9">Very active (athlete)</option></select></div>
+        <p style="font-size:11px;color:var(--light);margin-bottom:10px;">Runs from your BMR above — calculate that first.</p>
         <button class="calc-btn" onclick="calcTDEE()">Calculate calorie needs</button>
-        <div class="result-box" id="tdeeResultBox">
-          <div class="result-readout-label">Maintenance calories</div>
-          <div class="result-readout-value" id="tdeeVal">—</div>
-          <div class="result-extra" id="tdeeExtra"></div>
-        </div>
+        <div class="result-box" id="tdeeRes"><div class="r-label">Maintenance calories</div><div class="r-value" id="tdeeVal">—</div><div class="r-extra" id="tdeeExtra"></div></div>
       </div>
 
-      <!-- Body Fat % -->
+      <!-- Body Fat -->
       <div class="calc-card">
-        <div class="calc-icon">BF% · 04</div>
+        <div class="calc-num">BF% · 04</div>
         <h3>Body Fat Estimate</h3>
-        <p class="desc">U.S. Navy method using circumference measurements — no calipers needed.</p>
-        <div class="seg" id="bfSex">
-          <button class="active" data-s="female">Female</button>
-          <button data-s="male">Male</button>
-        </div>
-        <div class="field-row" style="margin-top:12px;">
-          <div class="field"><label>Waist (cm)</label><input type="number" id="bfWaist" placeholder="68" inputmode="decimal"></div>
-          <div class="field"><label>Neck (cm)</label><input type="number" id="bfNeck" placeholder="30" inputmode="decimal"></div>
-        </div>
-        <div class="field-row">
-          <div class="field" id="bfHipField"><label>Hip (cm)</label><input type="number" id="bfHip" placeholder="92" inputmode="decimal"></div>
-          <div class="field"><label>Height (cm)</label><input type="number" id="bfHeight" placeholder="160" inputmode="decimal"></div>
+        <p class="calc-desc">U.S. Navy method — circumference measurements, no calipers needed.</p>
+        <div class="seg" id="bfSexSeg"><button class="active" data-v="female">Female</button><button data-v="male">Male</button></div>
+        <div class="fl"><div class="f"><label>Waist (cm)</label><input type="number" id="bfWaist" placeholder="68" inputmode="decimal"></div><div class="f"><label>Neck (cm)</label><input type="number" id="bfNeck" placeholder="30" inputmode="decimal"></div></div>
+        <div class="fl">
+          <div class="f" id="hipField"><label>Hip (cm)</label><input type="number" id="bfHip" placeholder="92" inputmode="decimal"></div>
+          <div class="f"><label>Height (cm)</label><input type="number" id="bfH" placeholder="160" inputmode="decimal"></div>
         </div>
         <button class="calc-btn" onclick="calcBF()">Estimate body fat</button>
-        <div class="result-box" id="bfResultBox">
-          <div class="result-readout-label">Estimated body fat</div>
-          <div class="result-readout-value" id="bfVal">—</div>
-          <div class="result-readout-tag" id="bfTag">—</div>
-        </div>
+        <div class="result-box" id="bfRes"><div class="r-label">Estimated body fat</div><div class="r-value" id="bfVal">—</div><div class="r-tag" id="bfTag">—</div></div>
       </div>
 
-      <!-- Water intake -->
+      <!-- Water -->
       <div class="calc-card">
-        <div class="calc-icon">H₂O · 05</div>
+        <div class="calc-num">H₂O · 05</div>
         <h3>Daily Water Intake</h3>
-        <p class="desc">Hydration target adjusted for body weight and activity level.</p>
-        <div class="field-row">
-          <div class="field"><label>Weight (kg)</label><input type="number" id="waterWeight" placeholder="55" inputmode="decimal"></div>
-          <div class="field">
-            <label>Activity</label>
-            <select id="waterActivity">
-              <option value="0.033">Low</option>
-              <option value="0.04" selected>Moderate</option>
-              <option value="0.05">High</option>
-            </select>
-          </div>
-        </div>
+        <p class="calc-desc">Optimal hydration target adjusted for your weight and activity.</p>
+        <div class="fl"><div class="f"><label>Weight (kg)</label><input type="number" id="wW" placeholder="55" inputmode="decimal"></div><div class="f"><label>Activity</label><select id="wAct"><option value="0.033">Low</option><option value="0.04" selected>Moderate</option><option value="0.05">High</option></select></div></div>
         <button class="calc-btn" onclick="calcWater()">Calculate intake</button>
-        <div class="result-box" id="waterResultBox">
-          <div class="result-readout-label">Daily target</div>
-          <div class="result-readout-value" id="waterVal">—</div>
-          <div class="result-readout-tag">litres / day</div>
-        </div>
+        <div class="result-box" id="waterRes"><div class="r-label">Daily target</div><div class="r-value" id="waterVal">—</div><div class="r-tag">litres / day</div></div>
       </div>
 
-      <!-- Macro split -->
+      <!-- Macros -->
       <div class="calc-card">
-        <div class="calc-icon">MACRO · 06</div>
+        <div class="calc-num">MACRO · 06</div>
         <h3>Macro Split</h3>
-        <p class="desc">Protein, carb, and fat grams based on your calorie target and goal.</p>
-        <div class="field">
-          <label>Daily calories</label>
-          <input type="number" id="macroCals" placeholder="1800" inputmode="numeric">
-        </div>
-        <div class="field" style="margin-top:12px;">
-          <label>Goal</label>
-          <select id="macroGoal">
-            <option value="loss">Fat loss</option>
-            <option value="maintain" selected>Maintenance</option>
-            <option value="muscle">Muscle gain</option>
-          </select>
-        </div>
+        <p class="calc-desc">Protein, carb, and fat grams from your calorie target and goal.</p>
+        <div class="f" style="margin-bottom:11px;"><label>Daily calories</label><input type="number" id="mCal" placeholder="1800" inputmode="numeric"></div>
+        <div class="f" style="margin-bottom:11px;"><label>Goal</label><select id="mGoal"><option value="loss">Fat loss</option><option value="maintain" selected>Maintenance</option><option value="muscle">Muscle gain</option></select></div>
         <button class="calc-btn" onclick="calcMacro()">Split macros</button>
-        <div class="result-box" id="macroResultBox">
-          <div class="result-readout-label">Protein / Carbs / Fat</div>
-          <div class="result-readout-value" id="macroVal" style="font-size:22px;">—</div>
-          <div class="result-extra" id="macroExtra"></div>
-        </div>
+        <div class="result-box" id="macroRes"><div class="r-label">Protein / Carbs / Fat</div><div class="r-value" id="macroVal" style="font-size:20px;">—</div><div class="r-extra" id="macroExtra"></div></div>
       </div>
 
     </div>
   </div>
 </section>
 
-<!-- ───────────── GLYCEMIC INDEX ───────────── -->
-<section id="glycemic" class="alt-bg">
+<!-- ── GLYCEMIC ── -->
+<section id="glycemic" class="ink-section">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-num">02 — Searchable database</div>
-      <h2>Glycemic index & glycemic load lookup.</h2>
-      <p>Search any food to see how sharply it spikes blood sugar. 150+ foods across grains, fruit, dairy, sweets, and more — type to filter instantly.</p>
+      <div class="section-eyebrow">02 — Searchable database</div>
+      <h2 style="color:var(--cream);">Glycemic index & <em style="color:var(--sage2);">load lookup.</em></h2>
+      <p>Search any food to see how sharply it spikes blood sugar. 150+ foods spanning every category — type to filter instantly.</p>
     </div>
-
-    <div class="gi-shell">
-      <div class="gi-search-row">
-        <input type="text" id="giSearch" placeholder="Search a food — e.g. mango, white rice, paneer..." autocomplete="off">
-      </div>
-      <div class="gi-filters" id="giFilters"></div>
-      <div class="gi-meta" id="giMeta">Showing all foods</div>
-      <div class="gi-results" id="giResults"></div>
+    <div class="gi-wrap">
+      <input class="gi-input" id="giSearch" placeholder="Search — e.g. mango, oats, paneer, dark chocolate…" autocomplete="off">
+      <div class="gi-chips" id="giChips"></div>
+      <div class="gi-meta" id="giMeta"></div>
+      <div class="gi-list" id="giList"></div>
     </div>
   </div>
 </section>
 
-<!-- ───────────── BODY COMPOSITION ───────────── -->
+<!-- ── BODY COMP ── -->
 <section id="bodycomp">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-num">03 — Full analysis</div>
-      <h2>Body composition snapshot.</h2>
-      <p>Combine your measurements into one readout — BMI, body fat, lean mass, and ideal weight range — and get a routine matched to your result.</p>
+      <div class="section-eyebrow">03 — Full analysis</div>
+      <h2>Body composition <em>snapshot.</em></h2>
+      <p>Combine your measurements into one readout — BMI, body fat, lean mass, and a recommended routine matched to your goal.</p>
     </div>
-
-    <div class="bodycomp-grid">
+    <div class="bc-grid">
       <div class="bc-form">
-        <h3>Enter your measurements</h3>
-        <p class="sub">All fields used to generate your composition snapshot below.</p>
-
-        <div class="field-row">
-          <div class="field"><label>Age</label><input type="number" id="bcAge" placeholder="24"></div>
-          <div class="field">
-            <label>Sex</label>
-            <select id="bcSex"><option value="female">Female</option><option value="male">Male</option></select>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Height (cm)</label><input type="number" id="bcHeight" placeholder="160"></div>
-          <div class="field"><label>Weight (kg)</label><input type="number" id="bcWeight" placeholder="55"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Waist (cm)</label><input type="number" id="bcWaist" placeholder="68"></div>
-          <div class="field"><label>Neck (cm)</label><input type="number" id="bcNeck" placeholder="30"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Hip (cm) — if female</label><input type="number" id="bcHip" placeholder="92"></div>
-          <div class="field">
-            <label>Primary goal</label>
-            <select id="bcGoal">
-              <option value="lean">Lose fat / lean out</option>
-              <option value="tone" selected>Tone & build muscle</option>
-              <option value="maintain">Maintain & improve fitness</option>
-              <option value="gain">Gain weight / muscle</option>
-            </select>
-          </div>
-        </div>
-        <button class="calc-btn" style="width:100%; margin-top:8px; padding:13px 0;" onclick="runBodyComp()">Generate composition analysis</button>
+        <h3>Your measurements</h3>
+        <p class="sub">All fields generate your full composition analysis.</p>
+        <div class="fl"><div class="f"><label>Age</label><input type="number" id="bcAge" placeholder="24"></div><div class="f"><label>Sex</label><select id="bcSex"><option value="female">Female</option><option value="male">Male</option></select></div></div>
+        <div class="fl"><div class="f"><label>Height (cm)</label><input type="number" id="bcH" placeholder="160"></div><div class="f"><label>Weight (kg)</label><input type="number" id="bcW" placeholder="55"></div></div>
+        <div class="fl"><div class="f"><label>Waist (cm)</label><input type="number" id="bcWaist" placeholder="68"></div><div class="f"><label>Neck (cm)</label><input type="number" id="bcNeck" placeholder="30"></div></div>
+        <div class="fl"><div class="f"><label>Hip (cm) — female</label><input type="number" id="bcHip" placeholder="92"></div><div class="f"><label>Goal</label><select id="bcGoal"><option value="lean">Lose fat / lean out</option><option value="tone" selected>Tone & build muscle</option><option value="maintain">Maintain fitness</option><option value="gain">Gain muscle</option></select></div></div>
+        <button class="calc-btn" onclick="runBC()">Generate my analysis</button>
       </div>
-
-      <div class="bc-results" id="bcResultsPanel">
+      <div class="bc-panel" id="bcPanel">
         <h3>Your readout</h3>
-        <div class="bc-placeholder" id="bcPlaceholder">Fill in your measurements and generate your analysis to see results here.</div>
+        <div class="bc-placeholder" id="bcPlaceholder">Fill in your measurements above to see your complete composition snapshot here.</div>
         <div id="bcMetrics" style="display:none;">
-          <div class="bc-metric"><span class="bc-metric-label">BMI</span><span class="bc-metric-value" id="bcOutBMI">—</span></div>
-          <div class="bc-metric"><span class="bc-metric-label">Estimated body fat</span><span class="bc-metric-value" id="bcOutBF">—</span></div>
-          <div class="bc-metric"><span class="bc-metric-label">Lean mass</span><span class="bc-metric-value" id="bcOutLean">—</span></div>
-          <div class="bc-metric"><span class="bc-metric-label">Fat mass</span><span class="bc-metric-value" id="bcOutFat">—</span></div>
-          <div class="bc-metric"><span class="bc-metric-label">Ideal weight range</span><span class="bc-metric-value" id="bcOutIdeal">—</span></div>
-          <div class="bc-metric"><span class="bc-metric-label">BMR</span><span class="bc-metric-value" id="bcOutBMR">—</span></div>
-          <div class="bc-goal-tag" id="bcOutGoalTag">—</div>
+          <div class="bc-metric"><span class="bc-metric-lbl">BMI</span><span class="bc-metric-val" id="bcoBMI">—</span></div>
+          <div class="bc-metric"><span class="bc-metric-lbl">Body fat</span><span class="bc-metric-val" id="bcoBF">—</span></div>
+          <div class="bc-metric"><span class="bc-metric-lbl">Lean mass</span><span class="bc-metric-val" id="bcoLean">—</span></div>
+          <div class="bc-metric"><span class="bc-metric-lbl">Fat mass</span><span class="bc-metric-val" id="bcoFat">—</span></div>
+          <div class="bc-metric"><span class="bc-metric-lbl">Ideal weight range</span><span class="bc-metric-val" id="bcoIdeal">—</span></div>
+          <div class="bc-metric"><span class="bc-metric-lbl">BMR</span><span class="bc-metric-val" id="bcoBMR">—</span></div>
+          <div class="bc-goal-chip" id="bcoChip">—</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ───────────── ROUTINES ───────────── -->
-<section id="routines" class="alt-bg">
+<!-- ── ROUTINES ── -->
+<section id="routines" class="ink-section">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-num">04 — Personalised plan</div>
-      <h2>Get a routine matched to your goal.</h2>
-      <p>Generated instantly from your body composition goal above, or pick manually here — equipment-free, beginner-friendly, structured across a full week.</p>
+      <div class="section-eyebrow">04 — Weekly plan</div>
+      <h2 style="color:var(--cream);">A routine matched <em style="color:var(--gold);">to your goal.</em></h2>
+      <p>Equipment-free, beginner-friendly, structured across a full week. Changes with your body composition goal, or pick manually here.</p>
     </div>
-
-    <div class="field-row" style="max-width:420px; margin-bottom:8px;">
-      <div class="field">
-        <label style="color:rgba(247,243,234,0.6);">Choose a goal</label>
-        <select id="routineGoal" style="background:rgba(247,243,234,0.06); border-color:var(--paper-line-strong); color:var(--parchment);">
-          <option value="lean">Lose fat / lean out</option>
-          <option value="tone">Tone & build muscle</option>
-          <option value="maintain">Maintain & improve fitness</option>
-          <option value="gain">Gain weight / muscle</option>
+    <div class="fl" style="max-width:380px;margin-bottom:12px;">
+      <div class="f"><label style="color:rgba(251,246,240,.5);">Your goal</label>
+        <select id="routineGoal" style="background:rgba(251,246,240,.07);border-color:rgba(251,246,240,.18);color:var(--cream);">
+          <option value="lean">Lose fat / lean out</option><option value="tone" selected>Tone & build muscle</option><option value="maintain">Maintain fitness</option><option value="gain">Gain muscle</option>
         </select>
       </div>
     </div>
-    <button class="calc-btn" style="padding:13px 28px;" onclick="generateRoutine()">Generate my weekly routine</button>
-
-    <div class="routine-output" id="routineOutput"></div>
+    <button class="calc-btn" style="max-width:260px;padding:13px 0;" onclick="genRoutine()">Generate my weekly plan</button>
+    <div class="routine-output" id="routineOut"></div>
   </div>
 </section>
 
-<!-- ───────────── PRICING ───────────── -->
-<section id="pricing">
+<!-- ── PRICING ── -->
+<section id="pricing" class="pastel-section">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-num">05 — Go deeper</div>
-      <h2>Free tools, plus a premium layer.</h2>
-      <p>Every calculator above is free, permanently. The premium tier is for people who want a fully personalised plan, written and reviewed by a human.</p>
+      <div class="section-eyebrow">05 — Go deeper</div>
+      <h2>Free tools. <em>Premium layer.</em></h2>
+      <p>All calculators are free forever. The premium tier is a personally-written PDF plan built around your exact numbers — delivered to your inbox.</p>
     </div>
-
     <div class="price-grid">
       <div class="price-card">
         <div class="price-tier">Free — Self-serve</div>
@@ -640,43 +580,43 @@ footer{background:var(--ink); color:var(--parchment); padding:56px 0 28px;}
         <div class="price-amt">₹0 <span>/ forever</span></div>
         <ul class="price-list">
           <li>BMI, BMR, TDEE, body fat, water & macro calculators</li>
-          <li>Full searchable glycemic index database</li>
+          <li>Full searchable glycemic index & load database</li>
           <li>Body composition snapshot generator</li>
           <li>Auto-generated weekly workout routines</li>
           <li>Unlimited use, no account needed</li>
         </ul>
       </div>
-
-      <div class="price-card featured">
+      <div class="price-card feat">
         <div class="price-tier">Premium — Personal</div>
-        <h3>The Full Plan</h3>
+        <h3>The Codex</h3>
         <div class="price-amt">Custom <span>/ by request</span></div>
         <ul class="price-list">
-          <li>A personalised PDF guide built around your exact numbers, goals, and dietary pattern</li>
-          <li>Advanced glycemic-load meal sequencing for stable energy & anti-ageing</li>
-          <li>Seed, supplement & metabolism-repair protocols not published on the site</li>
-          <li>A 4–6 week progressive routine with deload structure</li>
+          <li>A 22-page personalised PDF plan built around your exact numbers and goals</li>
+          <li>Advanced glycemic-load meal sequencing and eating-order protocol</li>
+          <li>Seed cycling calendar mapped to your cycle phases</li>
+          <li>Metabolism-repair framework with progressive training arc</li>
+          <li>Anti-glycation skin protocol and supplement notes</li>
           <li>Direct email access for follow-up questions</li>
         </ul>
-        <a href="mailto:shuklanandini1308@gmail.com?subject=Premium%20Plan%20Request" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:8px;">Request your plan via email →</a>
+        <a href="mailto:shuklanandini1308@gmail.com?subject=Vitalmetrik%20Premium%20Plan%20Request" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:10px;">Request your plan →</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ───────────── ABOUT / CREDENTIALS ───────────── -->
-<section id="about" class="alt-bg">
+<!-- ── ABOUT ── -->
+<section id="about" class="ink-section">
   <div class="wrap">
     <div class="section-head">
-      <div class="section-num">06 — Who built this</div>
-      <h2>A tool built by someone who uses it.</h2>
+      <div class="section-eyebrow">06 — Who built this</div>
+      <h2 style="color:var(--cream);">A tool built by someone <em style="color:var(--gold);">who uses it.</em></h2>
     </div>
-
     <div class="about-grid">
       <div class="about-card">
         <div class="about-avatar">NS</div>
         <div class="about-name">Nandini Shukla</div>
         <div class="about-role">Lifestyle Enthusiast</div>
+        <div class="about-divider"></div>
         <div class="about-contact">
           <a href="mailto:shuklanandini1308@gmail.com">shuklanandini1308@gmail.com</a>
           <a href="#pricing">Request a premium plan →</a>
@@ -684,12 +624,12 @@ footer{background:var(--ink); color:var(--parchment); padding:56px 0 28px;}
       </div>
       <div class="about-body">
         <p>Vitalmetrik started as a personal project — a single place to keep every calculator, every glycemic value, and every routine I actually use, instead of having it scattered across a dozen apps and screenshots.</p>
-        <p>The free tools on this page are built to be precise and easy to act on, not just decorative. The premium plans are where the deeper, more specific guidance lives — the kind of detail that only makes sense one-to-one.</p>
-        <p>If you've got questions about your results, or want a plan built fully around you, email is always the fastest way to reach me.</p>
-        <div class="about-creds">
-          <span class="cred-pill">Lifestyle Enthusiast</span>
-          <span class="cred-pill">Built & maintained by Nandini Shukla</span>
-          <span class="cred-pill">shuklanandini1308@gmail.com</span>
+        <p>The free tools here are built to be precise and easy to act on. The premium plans are where the deeper, more specific guidance lives — the kind of detail that only makes sense one-to-one, built around your exact numbers.</p>
+        <p>If you have questions about your results, or want a plan built fully around you, email is always the fastest way to reach me.</p>
+        <div class="cred-chips">
+          <span class="cred-chip">Lifestyle Enthusiast</span>
+          <span class="cred-chip">Built by Nandini Shukla</span>
+          <span class="cred-chip">shuklanandini1308@gmail.com</span>
         </div>
       </div>
     </div>
@@ -698,13 +638,12 @@ footer{background:var(--ink); color:var(--parchment); padding:56px 0 28px;}
 
 </main>
 
-<!-- ───────────── FOOTER ───────────── -->
 <footer>
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <div class="footer-brand">Vitalmetrik</div>
-        <p class="footer-tag">Precision fitness calculators, a searchable glycemic index, and body composition tools — built and maintained by Nandini Shukla.</p>
+        <div class="footer-brand">Vital<span>metrik</span></div>
+        <p class="footer-tag">Precision wellness calculators, searchable glycemic index, and body composition tools — built and maintained by Nandini Shukla.</p>
       </div>
       <div class="footer-col">
         <h4>Tools</h4>
@@ -729,305 +668,283 @@ footer{background:var(--ink); color:var(--parchment); padding:56px 0 28px;}
 
 <script src="gi-data.js"></script>
 <script>
-// ── Mobile nav ──
-const navToggle=document.getElementById('navToggle'), navLinks=document.getElementById('navLinks');
-navToggle.addEventListener('click',()=>{
-  const open=navLinks.classList.toggle('open');
-  navToggle.setAttribute('aria-expanded',open);
-});
-document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{navLinks.classList.remove('open');navToggle.setAttribute('aria-expanded','false');}));
+// ─── Gender gate ─────────────────────────────────────────────────────────────
+function chooseGender(g){
+  switchGender(g);
+  const gate=document.getElementById('gate');
+  gate.classList.add('hidden');
+  setTimeout(()=>gate.style.display='none',550);
+}
+function switchGender(g){
+  const body=document.body;
+  if(g==='male'){
+    body.classList.add('male');
+    document.getElementById('ngp-m').classList.add('active');
+    document.getElementById('ngp-f').classList.remove('active');
+    document.getElementById('bmrSexSeg').querySelectorAll('button')[1].click();
+    document.getElementById('bfSexSeg').querySelectorAll('button')[1].click();
+    document.getElementById('bcSex').value='male';
+    document.getElementById('hero-eyebrow').textContent='Calibrated for him';
+    document.getElementById('hero-h1').innerHTML='Track your gains. <em>Fuel your machine.</em>';
+    document.getElementById('hero-lede').textContent='Every essential metric — BMI, BMR, body fat, calorie targets, macros — built for a man\'s physiology. Precise. Actionable. Free.';
+    document.getElementById('hipField').style.display='none';
+  } else {
+    body.classList.remove('male');
+    document.getElementById('ngp-f').classList.add('active');
+    document.getElementById('ngp-m').classList.remove('active');
+    document.getElementById('bmrSexSeg').querySelectorAll('button')[0].click();
+    document.getElementById('bfSexSeg').querySelectorAll('button')[0].click();
+    document.getElementById('bcSex').value='female';
+    document.getElementById('hero-eyebrow').textContent='Calibrated for her';
+    document.getElementById('hero-h1').innerHTML='Read your body like an <em>instrument panel.</em>';
+    document.getElementById('hero-lede').textContent='Every essential wellness number — BMI, BMR, body fat, glycemic load, macros — explained in one place. Free, precise, and built for real life.';
+    document.getElementById('hipField').style.display='';
+  }
+}
 
-// ── Segmented controls ──
-function setupSeg(id, attr, store){
-  const seg=document.getElementById(id);
-  seg.querySelectorAll('button').forEach(btn=>{
+// ─── Mobile nav ──────────────────────────────────────────────────────────────
+const ham=document.getElementById('ham'), nl=document.getElementById('navLinks');
+ham.addEventListener('click',()=>{const o=nl.classList.toggle('open');ham.setAttribute('aria-expanded',o);});
+nl.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nl.classList.remove('open');ham.setAttribute('aria-expanded','false');}));
+
+// ─── Segmented controls ───────────────────────────────────────────────────────
+const segs={};
+function setupSeg(id,key){
+  const el=document.getElementById(id);
+  el.querySelectorAll('button').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      seg.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      el.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
-      store.value=btn.getAttribute(attr);
+      segs[key]=btn.getAttribute('data-v');
+      if(key==='bfSex') document.getElementById('hipField').style.display=segs[key]==='male'?'none':'';
     });
   });
+  segs[key]=el.querySelector('button.active').getAttribute('data-v');
 }
-const state={bmiUnit:'metric',bmrSex:'female',bfSex:'female'};
-setupSeg('bmiUnit','data-u',{set value(v){state.bmiUnit=v;}});
-setupSeg('bmrSex','data-s',{set value(v){state.bmrSex=v;}});
-setupSeg('bfSex','data-s',{set value(v){state.bfSex=v; document.getElementById('bfHipField').style.display = v==='male' ? 'none':'block';}});
+setupSeg('bmiUnitSeg','bmiUnit');
+setupSeg('bmrSexSeg','bmrSex');
+setupSeg('bfSexSeg','bfSex');
 
-// ── BMI ──
-function calcBMI(){
-  const h=parseFloat(document.getElementById('bmiHeight').value);
-  const w=parseFloat(document.getElementById('bmiWeight').value);
-  if(!h||!w){return;}
-  const hm=h/100;
-  const bmi=w/(hm*hm);
-  let tag='Normal range', color='#A8C5A0';
-  if(bmi<18.5){tag='Underweight';color='#FFC470';}
-  else if(bmi>=25&&bmi<30){tag='Overweight';color='#FFC470';}
-  else if(bmi>=30){tag='Obese range';color='#FF8C6E';}
-  document.getElementById('bmiVal').textContent=bmi.toFixed(1);
-  const tagEl=document.getElementById('bmiTag');
-  tagEl.textContent=tag; tagEl.style.color=color;
-  document.getElementById('bmiResult').classList.add('show');
-}
+// ─── Calculator helpers ───────────────────────────────────────────────────────
+function show(id){document.getElementById(id).classList.add('show');}
+function v(id){return parseFloat(document.getElementById(id).value)||0;}
 
-// ── BMR (Mifflin-St Jeor) ──
 let lastBMR=null;
+
+function bmiColor(bmi){
+  if(bmi<18.5) return {tag:'Underweight',col:'#FFD070'};
+  if(bmi<25)   return {tag:'Normal range',col:'#A8D4A0'};
+  if(bmi<30)   return {tag:'Overweight',col:'#FFD070'};
+  return {tag:'Obese range',col:'#FF9070'};
+}
+function bfColor(bf,sex){
+  if(sex==='female'){
+    if(bf<14) return {tag:'Essential fat — very low',col:'#FFD070'};
+    if(bf<21) return {tag:'Athletic range',col:'#A8D4A0'};
+    if(bf<25) return {tag:'Fitness range',col:'#A8D4A0'};
+    if(bf<32) return {tag:'Acceptable range',col:'#FFD070'};
+    return {tag:'Above typical range',col:'#FF9070'};
+  } else {
+    if(bf<6)  return {tag:'Essential fat — very low',col:'#FFD070'};
+    if(bf<14) return {tag:'Athletic range',col:'#A8D4A0'};
+    if(bf<18) return {tag:'Fitness range',col:'#A8D4A0'};
+    if(bf<25) return {tag:'Acceptable range',col:'#FFD070'};
+    return {tag:'Above typical range',col:'#FF9070'};
+  }
+}
+
+function calcBMI(){
+  const h=v('bh'),w=v('bw');
+  if(!h||!w) return;
+  const bmi=w/((h/100)**2);
+  const {tag,col}=bmiColor(bmi);
+  document.getElementById('bmiVal').textContent=bmi.toFixed(1);
+  const t=document.getElementById('bmiTag');
+  t.textContent=tag; t.style.color=col;
+  show('bmiRes');
+}
+
 function calcBMR(){
-  const age=parseFloat(document.getElementById('bmrAge').value);
-  const h=parseFloat(document.getElementById('bmrHeight').value);
-  const w=parseFloat(document.getElementById('bmrWeight').value);
-  if(!age||!h||!w){return;}
-  let bmr = 10*w + 6.25*h - 5*age + (state.bmrSex==='male'?5:-161);
-  bmr=Math.round(bmr);
+  const age=v('ba'),h=v('bmrH'),w=v('bmrW');
+  if(!age||!h||!w) return;
+  const bmr=Math.round(10*w+6.25*h-5*age+(segs.bmrSex==='male'?5:-161));
   lastBMR=bmr;
   document.getElementById('bmrVal').textContent=bmr.toLocaleString();
-  document.getElementById('bmrResultBox').classList.add('show');
+  show('bmrRes');
 }
 
-// ── TDEE ──
 function calcTDEE(){
-  if(!lastBMR){
-    alert('Calculate your BMR first using the card to the left.');
-    return;
-  }
-  const mult=parseFloat(document.getElementById('tdeeActivity').value);
-  const tdee=Math.round(lastBMR*mult);
-  document.getElementById('tdeeVal').textContent=tdee.toLocaleString();
-  document.getElementById('tdeeExtra').innerHTML=`To lose weight: ~${(tdee-400).toLocaleString()} kcal/day<br>To gain weight: ~${(tdee+400).toLocaleString()} kcal/day`;
-  document.getElementById('tdeeResultBox').classList.add('show');
+  if(!lastBMR){alert('Calculate your BMR first using the card above.');return;}
+  const m=parseFloat(document.getElementById('tdeeAct').value);
+  const t=Math.round(lastBMR*m);
+  document.getElementById('tdeeVal').textContent=t.toLocaleString();
+  document.getElementById('tdeeExtra').innerHTML=`To lose fat: ~${(t-400).toLocaleString()} kcal/day<br>To gain muscle: ~${(t+300).toLocaleString()} kcal/day`;
+  show('tdeeRes');
 }
 
-// ── Body fat % (US Navy method) ──
 function calcBF(){
-  const waist=parseFloat(document.getElementById('bfWaist').value);
-  const neck=parseFloat(document.getElementById('bfNeck').value);
-  const height=parseFloat(document.getElementById('bfHeight').value);
-  const hip=parseFloat(document.getElementById('bfHip').value);
+  const waist=v('bfWaist'),neck=v('bfNeck'),height=v('bfH'),hip=v('bfHip');
   if(!waist||!neck||!height) return;
+  const sex=segs.bfSex;
   let bf;
-  if(state.bfSex==='male'){
+  if(sex==='male'){
+    if(waist<=neck){alert('Waist must be greater than neck.');return;}
     bf=495/(1.0324-0.19077*Math.log10(waist-neck)+0.15456*Math.log10(height))-450;
-  }else{
-    if(!hip) return;
+  } else {
+    if(!hip){alert('Hip measurement is needed for female body fat estimate.');return;}
+    if(waist+hip<=neck){alert('Please check your measurements.');return;}
     bf=495/(1.29579-0.35004*Math.log10(waist+hip-neck)+0.22100*Math.log10(height))-450;
   }
   bf=Math.max(3,Math.min(60,bf));
-  let tag='Fitness range', color='#A8C5A0';
-  if(state.bfSex==='female'){
-    if(bf<14){tag='Essential fat — very low';color='#FFC470';}
-    else if(bf<21){tag='Athletic range';color='#A8C5A0';}
-    else if(bf<25){tag='Fitness range';color='#A8C5A0';}
-    else if(bf<32){tag='Acceptable range';color='#FFC470';}
-    else{tag='Above typical range';color='#FF8C6E';}
-  }else{
-    if(bf<6){tag='Essential fat — very low';color='#FFC470';}
-    else if(bf<14){tag='Athletic range';color='#A8C5A0';}
-    else if(bf<18){tag='Fitness range';color='#A8C5A0';}
-    else if(bf<25){tag='Acceptable range';color='#FFC470';}
-    else{tag='Above typical range';color='#FF8C6E';}
-  }
   document.getElementById('bfVal').textContent=bf.toFixed(1)+'%';
-  const tagEl=document.getElementById('bfTag');
-  tagEl.textContent=tag; tagEl.style.color=color;
-  document.getElementById('bfResultBox').classList.add('show');
+  const {tag,col}=bfColor(bf,sex);
+  const t=document.getElementById('bfTag');
+  t.textContent=tag; t.style.color=col;
+  show('bfRes');
 }
 
-// ── Water intake ──
 function calcWater(){
-  const w=parseFloat(document.getElementById('waterWeight').value);
-  const mult=parseFloat(document.getElementById('waterActivity').value);
+  const w=v('wW');
   if(!w) return;
-  const litres=(w*mult).toFixed(1);
-  document.getElementById('waterVal').textContent=litres;
-  document.getElementById('waterResultBox').classList.add('show');
+  const m=parseFloat(document.getElementById('wAct').value);
+  document.getElementById('waterVal').textContent=(w*m).toFixed(1);
+  show('waterRes');
 }
 
-// ── Macro split ──
 function calcMacro(){
-  const cals=parseFloat(document.getElementById('macroCals').value);
-  const goal=document.getElementById('macroGoal').value;
+  const cals=v('mCal');
   if(!cals) return;
-  let pPct,cPct,fPct;
-  if(goal==='loss'){pPct=0.40;cPct=0.30;fPct=0.30;}
-  else if(goal==='muscle'){pPct=0.35;cPct=0.40;fPct=0.25;}
-  else{pPct=0.30;cPct=0.40;fPct=0.30;}
-  const pG=Math.round(cals*pPct/4);
-  const cG=Math.round(cals*cPct/4);
-  const fG=Math.round(cals*fPct/9);
-  document.getElementById('macroVal').textContent=`${pG}g / ${cG}g / ${fG}g`;
-  document.getElementById('macroExtra').innerHTML=`Protein ${Math.round(pPct*100)}% · Carbs ${Math.round(cPct*100)}% · Fat ${Math.round(fPct*100)}%`;
-  document.getElementById('macroResultBox').classList.add('show');
+  const goal=document.getElementById('mGoal').value;
+  let p,c,f;
+  if(goal==='loss'){p=.40;c=.30;f=.30;}
+  else if(goal==='muscle'){p=.35;c=.40;f=.25;}
+  else{p=.30;c=.40;f=.30;}
+  document.getElementById('macroVal').textContent=`${Math.round(cals*p/4)}g / ${Math.round(cals*c/4)}g / ${Math.round(cals*f/9)}g`;
+  document.getElementById('macroExtra').innerHTML=`Protein ${Math.round(p*100)}%  ·  Carbs ${Math.round(c*100)}%  ·  Fat ${Math.round(f*100)}%`;
+  show('macroRes');
 }
 
-// ── Glycemic Index search ──
-const categories=['All',...new Set(GI_DATABASE.map(f=>f.cat))];
-const giFiltersEl=document.getElementById('giFilters');
+// ─── GI Database ──────────────────────────────────────────────────────────────
+const cats=['All',...new Set(GI_DATABASE.map(f=>f.cat))];
+const chipsEl=document.getElementById('giChips');
 let activeCat='All';
-categories.forEach(cat=>{
+cats.forEach(cat=>{
   const chip=document.createElement('button');
-  chip.className='gi-filter-chip'+(cat==='All'?' active':'');
+  chip.className='gi-chip'+(cat==='All'?' active':'');
   chip.textContent=cat;
   chip.addEventListener('click',()=>{
     activeCat=cat;
-    giFiltersEl.querySelectorAll('.gi-filter-chip').forEach(c=>c.classList.remove('active'));
+    chipsEl.querySelectorAll('.gi-chip').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
     renderGI();
   });
-  giFiltersEl.appendChild(chip);
+  chipsEl.appendChild(chip);
 });
 
 function giBadge(gi){
-  if(gi===0) return {cls:'low',label:'N/A'};
-  if(gi<=55) return {cls:'low',label:'LOW'};
-  if(gi<=69) return {cls:'med',label:'MED'};
-  return {cls:'high',label:'HIGH'};
+  if(gi===0) return {cls:'low',lbl:'N/A'};
+  if(gi<=55)  return {cls:'low',lbl:'LOW'};
+  if(gi<=69)  return {cls:'med',lbl:'MED'};
+  return {cls:'high',lbl:'HIGH'};
 }
-
 function renderGI(){
   const q=document.getElementById('giSearch').value.trim().toLowerCase();
-  let results=GI_DATABASE.filter(f=>{
-    const matchCat = activeCat==='All' || f.cat===activeCat;
-    const matchQ = !q || f.n.toLowerCase().includes(q);
-    return matchCat && matchQ;
-  });
-  const resultsEl=document.getElementById('giResults');
-  const metaEl=document.getElementById('giMeta');
-  metaEl.textContent = `Showing ${results.length} of ${GI_DATABASE.length} foods${q?` for "${q}"`:''}`;
-  if(results.length===0){
-    resultsEl.innerHTML='<div class="gi-empty">No matches. Try a broader term — e.g. "rice" instead of a brand name.</div>';
-    return;
-  }
-  results.sort((a,b)=>a.n.localeCompare(b.n));
-  resultsEl.innerHTML=results.map(f=>{
-    const badge=giBadge(f.gi);
+  let res=GI_DATABASE.filter(f=>(activeCat==='All'||f.cat===activeCat)&&(!q||f.n.toLowerCase().includes(q)));
+  res.sort((a,b)=>a.n.localeCompare(b.n));
+  document.getElementById('giMeta').textContent=`Showing ${res.length} of ${GI_DATABASE.length} foods${q?' for "'+q+'"':''}`;
+  const list=document.getElementById('giList');
+  if(!res.length){list.innerHTML='<div class="gi-empty">No matches — try a broader term.</div>';return;}
+  const b=giBadge;
+  list.innerHTML=res.map(f=>{
+    const {cls,lbl}=b(f.gi);
     return `<div class="gi-row">
-      <div><div class="gi-name">${f.n}</div><div class="gi-cat">${f.cat} · serving ${f.serv}</div></div>
-      <div class="gi-val"><div class="gi-val-num">${f.gi}</div><div class="gi-val-label">GI</div></div>
-      <div class="gi-val"><div class="gi-val-num">${f.gl}</div><div class="gi-val-label">GL</div></div>
-      <div class="gi-badge ${badge.cls}">${badge.label}</div>
+      <div><div class="gi-name">${f.n}</div><div class="gi-cat">${f.cat} · ${f.serv}</div></div>
+      <div class="gi-num"><div class="gi-num-val">${f.gi}</div><div class="gi-num-lbl">GI</div></div>
+      <div class="gi-num"><div class="gi-num-val">${f.gl}</div><div class="gi-num-lbl">GL</div></div>
+      <div class="gi-pill ${cls}">${lbl}</div>
     </div>`;
   }).join('');
 }
 document.getElementById('giSearch').addEventListener('input',renderGI);
 renderGI();
 
-// ── Body composition ──
-function runBodyComp(){
-  const age=parseFloat(document.getElementById('bcAge').value);
+// ─── Body composition ─────────────────────────────────────────────────────────
+function runBC(){
+  const age=v('bcAge'),h=v('bcH'),w=v('bcW'),waist=v('bcWaist'),neck=v('bcNeck'),hip=v('bcHip');
   const sex=document.getElementById('bcSex').value;
-  const h=parseFloat(document.getElementById('bcHeight').value);
-  const w=parseFloat(document.getElementById('bcWeight').value);
-  const waist=parseFloat(document.getElementById('bcWaist').value);
-  const neck=parseFloat(document.getElementById('bcNeck').value);
-  const hip=parseFloat(document.getElementById('bcHip').value);
   const goal=document.getElementById('bcGoal').value;
-
-  if(!age||!h||!w||!waist||!neck){
-    alert('Please fill in age, height, weight, waist, and neck at minimum.');
-    return;
-  }
-
+  if(!age||!h||!w||!waist||!neck){alert('Please fill in age, height, weight, waist, and neck.');return;}
   const hm=h/100;
   const bmi=w/(hm*hm);
-
   let bf;
   if(sex==='male'){
+    if(waist<=neck){alert('Waist must be greater than neck.');return;}
     bf=495/(1.0324-0.19077*Math.log10(waist-neck)+0.15456*Math.log10(h))-450;
-  }else{
-    if(!hip){alert('Hip measurement is needed for female body fat estimate.');return;}
+  } else {
+    if(!hip){alert('Hip measurement needed for female body fat estimate.');return;}
     bf=495/(1.29579-0.35004*Math.log10(waist+hip-neck)+0.22100*Math.log10(h))-450;
   }
   bf=Math.max(3,Math.min(60,bf));
-
-  const fatMass=w*(bf/100);
-  const leanMass=w-fatMass;
-
-  const idealLow=18.5*hm*hm;
-  const idealHigh=24.9*hm*hm;
-
+  const fat=w*(bf/100), lean=w-fat;
   const bmr=Math.round(10*w+6.25*h-5*age+(sex==='male'?5:-161));
-
-  document.getElementById('bcOutBMI').textContent=bmi.toFixed(1);
-  document.getElementById('bcOutBF').textContent=bf.toFixed(1)+'%';
-  document.getElementById('bcOutLean').textContent=leanMass.toFixed(1)+' kg';
-  document.getElementById('bcOutFat').textContent=fatMass.toFixed(1)+' kg';
-  document.getElementById('bcOutIdeal').textContent=idealLow.toFixed(0)+'–'+idealHigh.toFixed(0)+' kg';
-  document.getElementById('bcOutBMR').textContent=bmr.toLocaleString()+' kcal';
-
-  const goalLabels={lean:'Recommended: Fat-loss focused routine ↓',tone:'Recommended: Tone & build routine ↓',maintain:'Recommended: Maintenance routine ↓',gain:'Recommended: Muscle-gain routine ↓'};
-  document.getElementById('bcOutGoalTag').textContent=goalLabels[goal];
-
+  document.getElementById('bcoBMI').textContent=bmi.toFixed(1);
+  document.getElementById('bcoBF').textContent=bf.toFixed(1)+'%';
+  document.getElementById('bcoLean').textContent=lean.toFixed(1)+' kg';
+  document.getElementById('bcoFat').textContent=fat.toFixed(1)+' kg';
+  document.getElementById('bcoIdeal').textContent=(18.5*hm*hm).toFixed(0)+'–'+(24.9*hm*hm).toFixed(0)+' kg';
+  document.getElementById('bcoBMR').textContent=bmr.toLocaleString()+' kcal';
+  const chips={lean:'Routine: Fat-loss focus recommended ↓',tone:'Routine: Tone & build recommended ↓',maintain:'Routine: Maintenance recommended ↓',gain:'Routine: Muscle-gain recommended ↓'};
+  document.getElementById('bcoChip').textContent=chips[goal];
   document.getElementById('bcPlaceholder').style.display='none';
   document.getElementById('bcMetrics').style.display='block';
-
   document.getElementById('routineGoal').value=goal;
 }
 
-// ── Routine generator ──
+// ─── Routines ─────────────────────────────────────────────────────────────────
 const ROUTINES={
-  lean:{
-    title:'Fat-Loss Focused — 6 days, equipment-free',
-    days:[
-      ['Monday','Cardio + Lower Body','20 min brisk walk/jog · 3x20 squats · 3x15 lunges/leg · 3x15 glute bridges'],
-      ['Tuesday','HIIT Circuit','4 rounds: 30s burpees, 30s mountain climbers, 30s jumping jacks, 30s rest'],
-      ['Wednesday','Core + Upper Body','3x15 push-ups · 3x30s plank · 3x20 bicycle crunches · 3x15 tricep dips'],
-      ['Thursday','Active Recovery','25 min yoga flow · stretching · 10 min walk'],
-      ['Friday','Full Body HIIT','4 rounds: squat jumps, push-ups, high knees, plank — 30s each'],
-      ['Saturday','Steady Cardio','30-40 min brisk walk or light jog + 15 min core work'],
-      ['Sunday','Rest','Complete rest, hydration, sleep focus'],
-    ]
-  },
-  tone:{
-    title:'Tone & Build — 6 days, equipment-free',
-    days:[
-      ['Monday','Lower Body','3x30 squats · 3x20 lunges/leg · 3x15 glute bridges · 1 min wall sit'],
-      ['Tuesday','Cardio + Core','3 rounds: jog in place, mountain climbers, bicycle crunches, plank'],
-      ['Wednesday','Upper Body','3x15 push-ups · 3x20 tricep dips · 3x15 shoulder taps · plank'],
-      ['Thursday','Yoga + Stretch','25 min mobility flow, focus on hip and shoulder opening'],
-      ['Friday','Full Body HIIT','4 rounds: burpees, squat jumps, push-ups, high knees'],
-      ['Saturday','Walk + Core','30 min walk + 3x20 leg raises + 3x15 reverse crunches'],
-      ['Sunday','Rest','Full rest day, light stretching only'],
-    ]
-  },
-  maintain:{
-    title:'Maintenance & Fitness — 5 days, equipment-free',
-    days:[
-      ['Monday','Full Body Strength','3x15 squats · 3x12 push-ups · 3x15 glute bridges · plank 45s'],
-      ['Tuesday','Cardio','25-30 min walk, jog, or dance — whatever you enjoy'],
-      ['Wednesday','Mobility + Core','20 min yoga + 3x20 bicycle crunches + 3x30s side plank/side'],
-      ['Thursday','Strength','3x15 lunges/leg · 3x15 tricep dips · 3x20 mountain climbers'],
-      ['Friday','Light Cardio + Stretch','20 min walk + full body stretching routine'],
-      ['Saturday','Optional Activity','Sport, hike, swim, or any movement you love'],
-      ['Sunday','Rest','Full rest day'],
-    ]
-  },
-  gain:{
-    title:'Muscle Gain — 5 days, equipment-free (progressive overload focus)',
-    days:[
-      ['Monday','Lower Body Strength','4x20 squats (slow tempo) · 4x15 lunges/leg · 4x15 glute bridges'],
-      ['Tuesday','Upper Body Strength','4x15 push-ups · 4x20 tricep dips · 4x15 pike push-ups'],
-      ['Wednesday','Rest / Active Recovery','Light walk + stretching, prioritise protein intake'],
-      ['Thursday','Full Body Volume','3 rounds: squats, push-ups, glute bridges, plank — high reps'],
-      ['Friday','Core + Stability','4x20 leg raises · 4x30s plank · 4x15 reverse crunches'],
-      ['Saturday','Strength (repeat Monday with added reps)','Increase reps by 10-15% from Monday'],
-      ['Sunday','Rest','Full rest — this is when muscle actually grows'],
-    ]
-  }
+  lean:{title:'Fat-Loss Focused — 6 days, no equipment',days:[
+    ['Monday','Cardio + Lower Body','20 min brisk walk · 3×20 squats · 3×15 lunges/leg · 3×15 glute bridges'],
+    ['Tuesday','HIIT Circuit','4 rounds: 30s burpees, 30s mountain climbers, 30s jumping jacks, 30s rest'],
+    ['Wednesday','Core + Upper Body','3×15 push-ups · 3×30s plank · 3×20 bicycle crunches · 3×15 tricep dips'],
+    ['Thursday','Active Recovery','25 min yoga · full-body stretching · 10 min walk'],
+    ['Friday','Full Body HIIT','4 rounds: squat jumps, push-ups, high knees, plank — 30s each, 15s rest'],
+    ['Saturday','Steady Cardio','30–40 min brisk walk + 15 min core work'],
+    ['Sunday','Rest','Complete rest, hydration, sleep focus'],
+  ]},
+  tone:{title:'Tone & Build — 6 days, no equipment',days:[
+    ['Monday','Lower Body','3×30 squats · 3×20 lunges/leg · 3×15 glute bridges · 1 min wall sit'],
+    ['Tuesday','Cardio + Core','3 rounds: jog in place, mountain climbers, bicycle crunches, plank'],
+    ['Wednesday','Upper Body','3×15 push-ups · 3×20 tricep dips · 3×15 shoulder taps · plank 45s'],
+    ['Thursday','Yoga + Stretch','25 min mobility flow — hip and shoulder opening focus'],
+    ['Friday','Full Body HIIT','4 rounds: burpees, squat jumps, push-ups, high knees — 30s each'],
+    ['Saturday','Walk + Core','30 min walk + 3×20 leg raises + 3×15 reverse crunches'],
+    ['Sunday','Rest','Full rest day — light stretching only'],
+  ]},
+  maintain:{title:'Maintenance & Fitness — 5 days, no equipment',days:[
+    ['Monday','Full Body Strength','3×15 squats · 3×12 push-ups · 3×15 glute bridges · plank 45s'],
+    ['Tuesday','Cardio','25–30 min walk, jog, or any activity you enjoy'],
+    ['Wednesday','Mobility + Core','20 min yoga + 3×20 bicycle crunches + 3×30s side plank/side'],
+    ['Thursday','Strength','3×15 lunges/leg · 3×15 tricep dips · 3×20 mountain climbers'],
+    ['Friday','Light Cardio + Stretch','20 min walk + full-body stretching routine'],
+    ['Saturday','Optional Activity','Sport, swim, dance — anything that moves you'],
+    ['Sunday','Rest','Full rest day'],
+  ]},
+  gain:{title:'Muscle Gain — 5 days, progressive overload focus',days:[
+    ['Monday','Lower Body Strength','4×20 squats (slow — 3s down, 1s hold) · 4×15 lunges/leg · 4×15 glute bridges'],
+    ['Tuesday','Upper Body Strength','4×15 push-ups · 4×20 tricep dips · 4×15 pike push-ups'],
+    ['Wednesday','Rest / Active Recovery','Light walk + stretching — prioritise protein intake today'],
+    ['Thursday','Full Body Volume','3 rounds: squats, push-ups, glute bridges, plank — high reps'],
+    ['Friday','Core + Stability','4×20 leg raises · 4×30s plank · 4×15 reverse crunches'],
+    ['Saturday','Strength (progressive)','Increase reps by 10–15% from Monday — log your numbers'],
+    ['Sunday','Rest','Full rest — muscle grows during recovery, not training'],
+  ]}
 };
-
-function generateRoutine(){
+function genRoutine(){
   const goal=document.getElementById('routineGoal').value;
   const r=ROUTINES[goal];
-  const out=document.getElementById('routineOutput');
-  out.innerHTML=`<h3 style="font-family:var(--serif); font-size:20px; margin-bottom:18px; color:var(--parchment);">${r.title}</h3>`+
-    r.days.map(([day,focus,moves])=>`
-      <div class="routine-day" style="background:rgba(247,243,234,0.04); border-color:var(--paper-line-strong);">
-        <div class="routine-day-label" style="color:var(--coral);">${day}</div>
-        <div class="routine-day-content">
-          <div class="focus" style="color:var(--parchment);">${focus}</div>
-          <div class="moves" style="color:rgba(247,243,234,0.65);">${moves}</div>
-        </div>
-      </div>`).join('');
+  const out=document.getElementById('routineOut');
+  out.innerHTML=`<div class="routine-head">${r.title}</div>`+
+    r.days.map(([day,focus,moves])=>`<div class="routine-day"><div class="rd-day">${day}</div><div><div class="rd-focus">${focus}</div><div class="rd-moves">${moves}</div></div></div>`).join('');
   out.classList.add('show');
   out.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
