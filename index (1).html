@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vitalmetrik — Precision Wellness Calculators</title>
+<meta name="description" content="Free BMI, BMR, body composition calculators and glycemic index. Built by Nandini Shukla.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Base palette (female default) ── */
+:root{
+  --bg:#FBF6F0; --bg2:#F5EDE2; --bg3:#EDE1D2;
+  --accent1:#D4A0AB; --accent2:#9C7B82; --accent3:#7A5A62;
+  --sage:#A8BCA2; --sage2:#6E8868;
+  --gold:#C9A769; --gold2:#A8854A;
+  --panel-bg:#2E2622; --panel-fg:#FBF6F0;
+  --chip-bg:#F3DEE2; --chip-txt:#9C7B82;
+  --ink:#2E2622; --muted:#7A6B65; --hint:#A89890;
+  --border:#E0D4CA; --border2:#C8BAB0;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',-apple-system,sans-serif;
+  --mono:'DM Mono','Courier New',monospace;
+}
+/* ── Male palette (deeply different) ── */
+body.male{
+  --bg:#F0F7F4; --bg2:#E0EFE9; --bg3:#C4DDCE;
+  --accent1:#3D9A7A; --accent2:#1E7055; --accent3:#124D3A;
+  --sage:#5BBFA0; --sage2:#1E7055;
+  --gold:#2E8B6A; --gold2:#1E7055;
+  --panel-bg:#0B1F18; --panel-fg:#F0F7F4;
+  --chip-bg:#C4DDCE; --chip-txt:#1E7055;
+  --ink:#0B1F18; --muted:#2E5A46; --hint:#6BA892;
+  --border:#B0D4C4; --border2:#88BBA8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;overflow-x:hidden;transition:background .5s,color .4s;}
+a{color:inherit;text-decoration:none;}
+button,input,select{font-family:inherit;cursor:pointer;transition:all .18s;}
+::selection{background:var(--accent1);color:#fff;}
+img{max-width:100%;}
+
+/* ── Grain overlay ── */
+.grain{position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* ── GENDER GATE ── */
+#gate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;transition:opacity .55s,transform .55s;}
+#gate.away{opacity:0;pointer-events:none;transform:scale(1.05);}
+.gate-logo{font-family:var(--serif);font-size:30px;font-weight:500;letter-spacing:.04em;margin-bottom:6px;text-align:center;}
+.gate-logo span{color:var(--gold2);}
+.gate-logo-sub{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--hint);margin-bottom:48px;text-align:center;}
+.gate-q{font-family:var(--serif);font-size:clamp(20px,3.5vw,30px);font-weight:400;font-style:italic;text-align:center;margin-bottom:6px;}
+.gate-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:36px;}
+.gate-btns{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
+.gate-btn{
+  width:148px;height:175px;border-radius:20px;border:1.5px solid var(--border);
+  background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  transition:all .25s;position:relative;overflow:hidden;
+}
+.gate-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;}
+.gate-btn.f::before{background:radial-gradient(circle at 50% 0%,#F3DEE2 0%,transparent 65%);}
+.gate-btn.m::before{background:radial-gradient(circle at 50% 0%,#C8DCE8 0%,transparent 65%);}
+.gate-btn:hover{border-color:var(--gold);transform:translateY(-5px);box-shadow:0 20px 48px -12px rgba(0,0,0,.15);}
+.gate-btn:hover::before{opacity:1;}
+.gate-btn-icon{font-size:36px;position:relative;z-index:1;}
+.gate-btn-lbl{font-family:var(--serif);font-size:18px;font-weight:500;position:relative;z-index:1;}
+.gate-btn-tag{font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;position:relative;z-index:1;}
+.gate-deco-f,.gate-deco-m{position:fixed;border-radius:50%;pointer-events:none;}
+.gate-deco-f{width:340px;height:340px;top:-80px;right:-80px;background:#F3DEE2;opacity:.28;}
+.gate-deco-m{width:260px;height:260px;bottom:-60px;left:-50px;background:#E2DCEF;opacity:.22;}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:rgba(251,246,240,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);transition:background .5s;}
+body.male .nav{background:rgba(238,244,248,.93);}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:66px;gap:16px;}
+.nav-brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.nav-mark{width:30px;height:30px;}
+.nav-wm{font-family:var(--serif);font-size:19px;font-weight:500;letter-spacing:.04em;}
+.nav-wm span{color:var(--gold2);}
+.nav-links{display:flex;gap:20px;align-items:center;flex:1;justify-content:center;}
+.nav-links a{font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:.02em;transition:color .15s;white-space:nowrap;}
+.nav-links a:hover{color:var(--ink);}
+.nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.gpill{display:flex;border:1px solid var(--border2);border-radius:99px;overflow:hidden;}
+.gpill-btn{padding:5px 13px;font-size:11.5px;font-weight:600;background:transparent;border:none;color:var(--muted);letter-spacing:.04em;transition:all .2s;}
+.gpill-btn.on{background:var(--ink);color:var(--bg);}
+.nav-cta{background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:4px;font-size:12.5px;font-weight:600;border:none;white-space:nowrap;}
+.nav-cta:hover{background:var(--gold2);}
+.ham{display:none;background:none;border:none;color:var(--ink);font-size:20px;padding:4px;}
+@media(max-width:900px){
+  .nav-links{display:none;flex-direction:column;position:fixed;top:66px;left:0;right:0;background:var(--bg);padding:18px 24px;border-bottom:1px solid var(--border);gap:14px;align-items:flex-start;}
+  .nav-links.open{display:flex;}
+  .ham{display:block;}
+  .nav-cta{display:none;}
+}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1200px;margin:0 auto;padding:0 28px;}
+@media(max-width:640px){.wrap{padding:0 18px;}}
+section{padding:80px 0;}
+
+/* ── SECTION HEAD ── */
+.ey{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold2);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.ey::before{content:'';width:18px;height:1px;background:var(--gold2);}
+.sh{margin-bottom:48px;}
+.sh h2{font-family:var(--serif);font-size:clamp(26px,3.8vw,42px);font-weight:500;line-height:1.1;letter-spacing:-.015em;margin-bottom:10px;}
+.sh h2 em{font-style:italic;color:var(--accent2);}
+.sh p{font-size:15px;color:var(--muted);line-height:1.7;max-width:540px;}
+.dark-section{background:var(--panel-bg);color:var(--panel-fg);}
+.dark-section .ey{color:var(--sage);}
+.dark-section .ey::before{background:var(--sage);}
+.dark-section .sh p{color:rgba(251,246,240,.6);}
+.dark-section .sh h2{color:var(--panel-fg);}
+body.male .dark-section .sh h2{color:var(--panel-fg);}
+body.male .dark-section .sh p{color:rgba(240,247,244,.6);}
+body.male .dark-section .ey{color:#5BBFA0;}
+body.male .dark-section .ey::before{background:#5BBFA0;}
+.pastel-section{background:var(--bg2);transition:background .5s;}
+
+/* ── HERO ── */
+.hero{padding:80px 0 64px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.hero-orb1{position:absolute;top:-100px;right:-80px;width:480px;height:480px;border-radius:50%;background:var(--accent1);opacity:.18;pointer-events:none;transition:background .5s;}
+.hero-orb2{position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;border-radius:50%;background:var(--sage);opacity:.15;pointer-events:none;transition:background .5s;}
+.hg{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;position:relative;}
+@media(max-width:880px){.hg{grid-template-columns:1fr;gap:36px;}}
+.heyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.heyebrow::before{content:'';width:22px;height:1px;background:var(--accent2);}
+.hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,58px);font-weight:500;line-height:1.02;letter-spacing:-.02em;margin-bottom:20px;}
+.hero h1 em{font-style:italic;color:var(--accent2);}
+.hero-lede{font-size:15.5px;color:var(--muted);max-width:460px;margin-bottom:30px;line-height:1.7;}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:4px;font-size:13.5px;font-weight:600;letter-spacing:.02em;border:1px solid transparent;transition:all .2s;}
+.btn-p{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+.btn-p:hover{background:var(--gold2);border-color:var(--gold2);transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--ink);border-color:var(--border2);}
+.btn-g:hover{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+
+/* Hero panel */
+.hpanel{background:var(--panel-bg);border-radius:14px;padding:28px;box-shadow:0 24px 52px -16px rgba(0,0,0,.3);position:relative;overflow:hidden;}
+.hpanel-orb{position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:var(--accent1);opacity:.1;pointer-events:none;}
+.hp-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(251,246,240,.4);margin-bottom:5px;}
+body.male .hp-lbl{color:rgba(238,244,248,.4);}
+.hp-val{font-family:var(--mono);font-size:46px;font-weight:500;color:var(--panel-fg);line-height:1;letter-spacing:-.02em;}
+.hp-unit{font-family:var(--mono);font-size:11.5px;color:var(--sage);margin-bottom:6px;}
+.hp-badge{display:inline-block;padding:5px 11px;border-radius:99px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:rgba(168,188,162,.2);color:#A8D4A0;}
+.hp-bar{height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin:18px 0;}
+.hp-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--sage),var(--accent1));width:62%;transition:width .6s ease;}
+.hpgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.hpcard{padding:13px;background:rgba(255,255,255,.05);border-radius:8px;border:1px solid rgba(255,255,255,.08);}
+.hpcard .hp-val{font-size:17px;}
+
+/* ── CALC GRID ── */
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:960px){.cgrid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:580px){.cgrid{grid-template-columns:1fr;}}
+.ccard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;display:flex;flex-direction:column;transition:border-color .2s,transform .2s,box-shadow .2s;}
+.ccard:hover{border-color:var(--accent1);transform:translateY(-3px);box-shadow:0 14px 36px -8px rgba(0,0,0,.1);}
+.cnum{font-family:var(--mono);font-size:10px;color:var(--gold2);letter-spacing:.1em;margin-bottom:10px;}
+.ccard h3{font-family:var(--serif);font-size:19px;font-weight:500;margin-bottom:5px;}
+.cdesc{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.55;flex:1;}
+.seg{display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.seg button{flex:1;padding:7px 0;background:var(--bg);border:none;font-size:12px;font-weight:600;color:var(--muted);border-right:1px solid var(--border);}
+.seg button:last-child{border-right:none;}
+.seg button.on{background:var(--ink);color:var(--bg);}
+.fl{display:flex;gap:8px;margin-bottom:9px;flex-wrap:wrap;}
+.f{flex:1;min-width:80px;}
+.f label{display:block;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--hint);margin-bottom:4px;}
+.f input,.f select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:4px;font-size:13px;background:#fff;color:var(--ink);font-family:var(--mono);}
+.f input:focus,.f select:focus{outline:none;border-color:var(--accent1);}
+.cbtn{width:100%;padding:10px;background:var(--ink);color:var(--bg);border:none;border-radius:4px;font-size:13px;font-weight:600;letter-spacing:.02em;margin-top:4px;}
+.cbtn:hover{background:var(--gold2);}
+.rbox{display:none;margin-top:12px;background:var(--panel-bg);border-radius:8px;padding:14px 16px;animation:slideIn .3s ease;}
+.rbox.on{display:block;}
+@keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.rl{font-family:var(--mono);font-size:9px;color:rgba(251,246,240,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+body.male .rl{color:rgba(238,244,248,.4);}
+.rv{font-family:var(--mono);font-size:26px;font-weight:500;color:var(--panel-fg);line-height:1.1;}
+.rt{font-family:var(--mono);font-size:11px;color:var(--sage);margin-top:4px;}
+.re{font-size:11px;color:rgba(251,246,240,.6);margin-top:7px;line-height:1.6;}
+body.male .re{color:rgba(238,244,248,.6);}
+
+/* imperial unit labels */
+.cm-lbl::after{content:'cm';}
+.kg-lbl::after{content:'kg';}
+.ft-lbl::after{content:'ft';}
+.lb-lbl::after{content:'lbs';}
+.in-lbl::after{content:'in';}
+
+/* ── GI SECTION ── */
+.gi-shell{border-radius:14px;overflow:hidden;}
+.gi-top{padding:28px 28px 0;}
+.gi-search-wrap{position:relative;margin-bottom:16px;}
+.gi-search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;color:rgba(251,246,240,.4);pointer-events:none;}
+body.male .gi-search-icon{color:rgba(238,244,248,.4);}
+.gi-inp{width:100%;padding:15px 18px 15px 44px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:var(--panel-fg);font-size:14.5px;font-family:var(--sans);}
+.gi-inp::placeholder{color:rgba(255,255,255,.3);}
+.gi-inp:focus{outline:none;border-color:var(--gold);}
+.gi-chips{display:flex;gap:7px;flex-wrap:wrap;padding:0 28px 16px;}
+.gi-chip{padding:6px 13px;border-radius:99px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.6);font-size:11px;font-weight:500;transition:all .15s;}
+.gi-chip:hover{border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.9);}
+.gi-chip.on{background:var(--gold);border-color:var(--gold);color:var(--ink);}
+.gi-meta{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);padding:0 28px 12px;letter-spacing:.04em;}
+.gi-header{display:grid;grid-template-columns:1fr 72px 72px 88px;gap:10px;padding:10px 28px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);}
+.gi-header span{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.gi-list{max-height:520px;overflow-y:auto;padding:8px 28px 28px;}
+.gi-list::-webkit-scrollbar{width:4px;}
+.gi-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:2px;}
+.gi-row{display:grid;grid-template-columns:1fr 72px 72px 88px;gap:10px;align-items:center;padding:11px 12px;border-radius:6px;border:1px solid transparent;transition:all .15s;cursor:default;margin-bottom:4px;}
+.gi-row:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);}
+@media(max-width:600px){.gi-row,.gi-header{grid-template-columns:1fr 56px 56px;}.gi-row>:last-child,.gi-header>:last-child{display:none;}}
+.gi-name{font-size:13px;font-weight:600;color:var(--panel-fg);}
+.gi-cat{font-family:var(--mono);font-size:9.5px;color:rgba(255,255,255,.35);margin-top:2px;}
+.gi-num{text-align:center;}
+.gi-num-v{font-family:var(--mono);font-size:15px;font-weight:600;}
+.gi-num-u{font-family:var(--mono);font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;}
+.gib{font-family:var(--mono);font-size:9.5px;font-weight:700;padding:4px 9px;border-radius:99px;text-align:center;letter-spacing:.04em;}
+.gib.lo{background:rgba(100,200,120,.18);color:#80E09A;}
+.gib.me{background:rgba(255,190,70,.16);color:#FFCA50;}
+.gib.hi{background:rgba(255,90,70,.18);color:#FF8070;}
+.gi-empty{padding:48px;text-align:center;color:rgba(255,255,255,.35);font-size:13px;}
+
+/* Spike bar on GI number */
+.gi-bar-bg{width:100%;height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:3px;}
+.gi-bar-fill{height:100%;border-radius:2px;transition:width .3s;}
+
+/* ── BODY COMP ── */
+.bcg{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+@media(max-width:840px){.bcg{grid-template-columns:1fr;}}
+.bcform{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;}
+.bcform h3{font-family:var(--serif);font-size:20px;font-weight:500;margin-bottom:5px;}
+.bcform .sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+.bcpanel{background:var(--panel-bg);border-radius:12px;padding:28px;color:var(--panel-fg);}
+.bcpanel h3{font-family:var(--serif);font-size:20px;font-weight:500;margin-bottom:18px;}
+.bcm{display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);}
+.bcm:last-of-type{border-bottom:none;}
+.bcm-l{font-size:12.5px;color:rgba(255,255,255,.6);}
+body.male .bcm-l{color:rgba(238,244,248,.6);}
+.bcm-v{font-family:var(--mono);font-size:16px;font-weight:500;}
+.bcph{display:flex;align-items:center;justify-content:center;text-align:center;padding:50px 20px;color:rgba(255,255,255,.3);font-size:13px;}
+body.male .bcph{color:rgba(238,244,248,.3);}
+.bcc{display:inline-block;margin-top:16px;padding:9px 16px;background:var(--gold2);color:#fff;border-radius:4px;font-size:12px;font-weight:600;text-align:center;}
+
+/* ── ROUTINES ── */
+.rout{display:none;margin-top:24px;animation:slideIn .3s ease;}
+.rout.on{display:block;}
+.rout-h{font-family:var(--serif);font-size:20px;font-weight:500;color:var(--panel-fg);margin-bottom:16px;}
+.rday{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:start;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:14px 16px;margin-bottom:7px;animation:slideIn .3s ease;}
+.rday:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18);}
+@media(max-width:540px){.rday{grid-template-columns:1fr;gap:4px;}}
+.rday-d{font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;}
+.rday-f{font-size:14px;font-weight:600;color:var(--panel-fg);margin-bottom:3px;}
+.rday-m{font-size:12px;color:rgba(255,255,255,.55);line-height:1.6;}
+body.male .rday-m{color:rgba(238,244,248,.55);}
+
+/* ── PRICING ── */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:700px){.pgrid{grid-template-columns:1fr;}}
+.pcard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:32px;}
+.pcard.feat{background:var(--ink);color:var(--bg);position:relative;overflow:hidden;}
+.pcard.feat::after{content:'ATELIER';position:absolute;top:22px;right:-28px;background:var(--gold);color:var(--ink);font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;padding:5px 34px;transform:rotate(45deg);}
+.ptier{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold2);margin-bottom:8px;opacity:1;}
+.pcard.feat .ptier{color:var(--sage);}
+.pcard h3{font-family:var(--serif);font-size:24px;font-weight:500;margin-bottom:8px;}
+.pamt{font-family:var(--mono);font-size:30px;font-weight:500;margin:16px 0 5px;}
+.pamt span{font-size:12px;font-weight:400;opacity:.5;}
+.plist{list-style:none;margin:20px 0;display:flex;flex-direction:column;gap:10px;}
+.plist li{font-size:13px;display:flex;gap:8px;line-height:1.55;}
+.plist li::before{content:'—';color:var(--gold);flex-shrink:0;}
+
+/* ── ABOUT ── */
+.abg{display:grid;grid-template-columns:250px 1fr;gap:40px;align-items:start;}
+@media(max-width:720px){.abg{grid-template-columns:1fr;}}
+.acard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;text-align:center;}
+.aav{width:76px;height:76px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,var(--accent1),var(--gold));display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:24px;font-weight:500;color:#fff;}
+.aname{font-family:var(--serif);font-size:19px;font-weight:500;margin-bottom:3px;}
+.arole{font-size:11.5px;color:var(--accent2);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:14px;}
+.adiv{height:1px;background:var(--border);margin-bottom:14px;}
+.acont a{display:block;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-bottom:7px;transition:color .15s;}
+.acont a:hover{color:var(--gold2);}
+.abody p{font-size:14.5px;color:var(--muted);line-height:1.75;margin-bottom:12px;}
+.achips{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px;}
+.achip{font-family:var(--mono);font-size:10px;padding:5px 11px;background:var(--bg2);border-radius:99px;border:1px solid var(--border);color:var(--muted);}
+
+/* ── FOOTER ── */
+footer{background:var(--panel-bg);color:var(--panel-fg);padding:48px 0 24px;}
+.fg{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:32px;padding-bottom:32px;border-bottom:1px solid rgba(255,255,255,.1);}
+@media(max-width:600px){.fg{grid-template-columns:1fr;gap:24px;}}
+.fbrand{font-family:var(--serif);font-size:20px;font-weight:500;margin-bottom:8px;}
+.fbrand span{color:var(--gold);}
+.ftag{font-size:12.5px;color:rgba(255,255,255,.45);max-width:260px;line-height:1.65;}
+.fcol h4{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-bottom:12px;}
+.fcol a{display:block;font-size:13px;color:rgba(255,255,255,.65);margin-bottom:8px;transition:color .15s;}
+.fcol a:hover{color:var(--gold);}
+.fbot{display:flex;justify-content:space-between;align-items:center;padding-top:20px;flex-wrap:wrap;gap:8px;}
+.fbot span{font-size:11px;color:rgba(255,255,255,.3);font-family:var(--mono);}
+
+/* ── FUN EXTRAS ── */
+
+/* Pulsing live dot on hero panel */
+.live-dot{display:inline-block;width:7px;height:7px;background:#80E09A;border-radius:50%;margin-right:6px;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(128,224,154,.5)}50%{opacity:.8;box-shadow:0 0 0 5px rgba(128,224,154,0)}}
+
+/* Hover tooltip on GI rows */
+.gi-row{position:relative;}
+.gi-tip{display:none;position:absolute;left:50%;top:-38px;transform:translateX(-50%);background:var(--ink);color:var(--panel-fg);font-size:10.5px;padding:5px 10px;border-radius:6px;white-space:nowrap;z-index:10;pointer-events:none;font-family:var(--mono);}
+body.male .gi-tip{background:var(--panel-bg);}
+.gi-row:hover .gi-tip{display:block;}
+
+/* Floating animation on gate buttons */
+.gate-btn.f{animation:floatF 4s ease-in-out infinite;}
+.gate-btn.m{animation:floatM 4s ease-in-out 1.2s infinite;}
+@keyframes floatF{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes floatM{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.gate-btn:hover{animation:none!important;}
+
+/* GI progress bar animated on entry */
+.gi-bar-fill{animation:barGrow .5s ease forwards;}
+@keyframes barGrow{from{width:0}to{width:var(--w,0%)}}
+
+/* Calc card number counter animation */
+.rv.counting{animation:countUp .5s ease;}
+@keyframes countUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Sparkle on result appear */
+.rbox.on{animation:sparkleIn .4s cubic-bezier(.34,1.56,.64,1);}
+@keyframes sparkleIn{from{opacity:0;transform:scale(.95) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+/* Category chip selected bounce */
+.gi-chip.on{animation:chipBounce .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes chipBounce{from{transform:scale(.9)}to{transform:scale(1)}}
+
+/* Routine day stagger slide in */
+.rday{opacity:0;animation:slideUp .35s ease forwards;}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Scroll progress indicator */
+.scroll-prog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent1),var(--gold));z-index:200;transition:width .1s linear;pointer-events:none;}
+
+/* Fun hover on nav cta */
+.nav-cta{position:relative;overflow:hidden;}
+.nav-cta::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.15) 50%,transparent 70%);transform:translateX(-200%);transition:transform .5s;}
+.nav-cta:hover::after{transform:translateX(200%);}
+
+/* Male mode teal glow on panel */
+body.male .hpanel{box-shadow:0 24px 52px -16px rgba(30,112,85,.25);}
+
+/* Female mode rose glow on panel */
+body:not(.male) .hpanel{box-shadow:0 24px 52px -16px rgba(212,160,171,.3);}
+
+/* Smooth colour transition for gender switch */
+*{transition:background-color .4s,border-color .3s,color .2s;}
+.gi-bar-fill,.hp-bar-fill,.rbox,.rday{transition:none;}
+
+/* GI spike meter ring */
+.gi-meter{position:relative;width:52px;height:52px;flex-shrink:0;}
+.gi-meter svg{transform:rotate(-90deg);}
+.gi-meter-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:600;}
+
+/* Fun fact toast */
+#funfact{position:fixed;bottom:24px;right:24px;background:var(--panel-bg);color:var(--panel-fg);padding:14px 18px;border-radius:10px;font-size:12.5px;max-width:260px;line-height:1.5;z-index:500;border-left:3px solid var(--gold);opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s;pointer-events:none;}
+#funfact.show{opacity:1;transform:translateY(0);}
+#funfact strong{color:var(--gold);font-size:10px;display:block;margin-bottom:3px;letter-spacing:.06em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<!-- Gate -->
+<div id="gate" role="dialog" aria-modal="true" aria-label="Choose your experience">
+  <div class="gate-deco-f" aria-hidden="true"></div>
+  <div class="gate-deco-m" aria-hidden="true"></div>
+  <div class="gate-logo">Vital<span>metrik</span></div>
+  <div class="gate-logo-sub">Precision Wellness Calculators</div>
+  <p class="gate-q">Who are we calibrating for?</p>
+  <p class="gate-sub">Tools, colours and plans adapt to your choice.</p>
+  <div class="gate-btns">
+    <button class="gate-btn f" onclick="pick('female')" aria-label="Female">
+      <span class="gate-btn-icon" aria-hidden="true">🌸</span>
+      <span class="gate-btn-lbl">Female</span>
+      <span class="gate-btn-tag">Her body, her rhythm</span>
+    </button>
+    <button class="gate-btn m" onclick="pick('male')" aria-label="Male">
+      <span class="gate-btn-icon" aria-hidden="true">⚡</span>
+      <span class="gate-btn-lbl">Male</span>
+      <span class="gate-btn-tag">Built for him</span>
+    </button>
+  </div>
+</div>
+
+<div class="scroll-prog" id="sp"></div>
+<div class="grain" aria-hidden="true"></div>
+<div id="funfact" role="status" aria-live="polite"><strong>💡 Vitalmetrik tip</strong><span id="fftxt"></span></div>
+<a href="#main" style="position:absolute;left:-9999px;top:0;background:var(--gold);color:#fff;padding:8px 16px;z-index:10000;" onfocus="this.style.left='16px'" onblur="this.style.left='-9999px'">Skip to content</a>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand" aria-label="Vitalmetrik home">
+      <svg class="nav-mark" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+        <circle cx="15" cy="15" r="13.5" fill="var(--chip-bg)" stroke="var(--gold)" stroke-width="1"/>
+        <polyline points="3,15 7,15 10,8 13,22 15.5,11 18,19 21,15 27,15" fill="none" stroke="var(--gold2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="nav-wm">Vital<span>metrik</span></span>
+    </a>
+    <button class="ham" id="ham" aria-label="Open menu" aria-expanded="false">☰</button>
+    <div class="nav-links" id="nl">
+      <a href="#calculators">Calculators</a>
+      <a href="#glycemic">Glycemic Index</a>
+      <a href="#bodycomp">Body Comp</a>
+      <a href="#routines">Routines</a>
+      <a href="#pricing">Premium</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="nav-right">
+      <div class="gpill" role="group" aria-label="Switch gender">
+        <button class="gpill-btn on" id="gf" onclick="setG('female')">♀ Female</button>
+        <button class="gpill-btn" id="gm" onclick="setG('male')">♂ Male</button>
+      </div>
+      <button class="nav-cta" onclick="location.href='#pricing'">Get Premium PDF</button>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ── HERO ── -->
+<header class="hero">
+  <div class="hero-orb1" aria-hidden="true"></div>
+  <div class="hero-orb2" aria-hidden="true"></div>
+  <div class="wrap hg">
+    <div>
+      <div class="heyebrow" id="h-ey">Calibrated for her</div>
+      <h1 id="h-h1">Read your body like an <em>instrument panel.</em></h1>
+      <p class="hero-lede" id="h-lede">Every essential wellness number — BMI, BMR, body fat, glycemic load, macros — explained in one place. Free, precise, and built for real life.</p>
+      <div class="hero-actions">
+        <a href="#calculators" class="btn btn-p">Open the calculators →</a>
+        <a href="#glycemic" class="btn btn-g">Search glycemic index</a>
+      </div>
+    </div>
+    <div class="hpanel">
+      <div class="hpanel-orb" aria-hidden="true"></div>
+      <div class="hp-lbl"><span class="live-dot" aria-hidden="true"></span>Basal Metabolic Rate</div>
+      <div class="hp-val">1,412</div>
+      <div class="hp-unit">kcal / day at rest</div>
+      <span class="hp-badge">Normal range</span>
+      <div class="hp-bar"><div class="hp-bar-fill"></div></div>
+      <div class="hpgrid">
+        <div class="hpcard"><div class="hp-lbl">BMI</div><div class="hp-val">21.4</div></div>
+        <div class="hpcard"><div class="hp-lbl">TDEE</div><div class="hp-val">1,940</div></div>
+        <div class="hpcard"><div class="hp-lbl">Body fat</div><div class="hp-val" style="color:var(--sage);">24%</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── CALCULATORS ── -->
+<section id="calculators">
+  <div class="wrap">
+    <div class="sh">
+      <div class="ey">01 — Calculators</div>
+      <h2>Every number. <em>One place.</em></h2>
+      <p>Six precision calculators, each giving you an instant reading plus the context to know what it actually means.</p>
+    </div>
+    <div class="cgrid">
+
+      <!-- BMI -->
+      <div class="ccard">
+        <div class="cnum">BMI · 01</div>
+        <h3>Body Mass Index</h3>
+        <p class="cdesc">Weight relative to height — a population screening number. Switch units below.</p>
+        <div class="seg" id="bmiUnitSeg" role="group" aria-label="Unit system">
+          <button class="on" data-v="metric" onclick="setSeg('bmiUnitSeg',this,'bmiUnit')">Metric</button>
+          <button data-v="imperial" onclick="setSeg('bmiUnitSeg',this,'bmiUnit')">Imperial</button>
+        </div>
+        <div class="fl">
+          <div class="f"><label id="bmiHLbl">Height (cm)</label><input type="number" id="bmiH" placeholder="160" inputmode="decimal" aria-labelledby="bmiHLbl"></div>
+          <div class="f"><label id="bmiWLbl">Weight (kg)</label><input type="number" id="bmiW" placeholder="55" inputmode="decimal" aria-labelledby="bmiWLbl"></div>
+        </div>
+        <p id="bmiHint" style="font-size:10.5px;color:var(--hint);margin-bottom:8px;display:none;">Imperial: enter height in inches (e.g. 63 for 5'3"), weight in pounds</p>
+        <button class="cbtn" onclick="calcBMI()">Calculate BMI</button>
+        <div class="rbox" id="bmiRes" role="region" aria-live="polite">
+          <div class="rl">Your BMI</div>
+          <div class="rv" id="bmiV">—</div>
+          <div class="rt" id="bmiT">—</div>
+          <div class="re" id="bmiE"></div>
+        </div>
+      </div>
+
+      <!-- BMR -->
+      <div class="ccard">
+        <div class="cnum">BMR · 02</div>
+        <h3>Basal Metabolic Rate</h3>
+        <p class="cdesc">Calories burned at complete rest — Mifflin-St Jeor equation, the most validated formula.</p>
+        <div class="seg" id="bmrSexSeg" role="group" aria-label="Biological sex">
+          <button class="on" data-v="female" onclick="setSeg('bmrSexSeg',this,'bmrSex')">Female</button>
+          <button data-v="male" onclick="setSeg('bmrSexSeg',this,'bmrSex')">Male</button>
+        </div>
+        <div class="fl">
+          <div class="f"><label>Age</label><input type="number" id="bmrA" placeholder="24" inputmode="numeric"></div>
+          <div class="f"><label>Height (cm)</label><input type="number" id="bmrH" placeholder="160" inputmode="decimal"></div>
+        </div>
+        <div class="fl">
+          <div class="f"><label>Weight (kg)</label><input type="number" id="bmrW" placeholder="55" inputmode="decimal"></div>
+        </div>
+        <button class="cbtn" onclick="calcBMR()">Calculate BMR</button>
+        <div class="rbox" id="bmrRes" role="region" aria-live="polite">
+          <div class="rl">Calories at rest</div>
+          <div class="rv" id="bmrV">—</div>
+          <div class="rt">kcal / day</div>
+        </div>
+      </div>
+
+      <!-- TDEE -->
+      <div class="ccard">
+        <div class="cnum">TDEE · 03</div>
+        <h3>Daily Calorie Needs</h3>
+        <p class="cdesc">Total daily energy based on your activity level. Calculate BMR first, then run this.</p>
+        <div class="f" style="margin-bottom:9px;">
+          <label>Activity level</label>
+          <select id="tdeeAct">
+            <option value="1.2">Sedentary (desk work, little exercise)</option>
+            <option value="1.375">Light (1–3 workouts / week)</option>
+            <option value="1.55" selected>Moderate (3–5 workouts / week)</option>
+            <option value="1.725">Active (6–7 workouts / week)</option>
+            <option value="1.9">Very active (athlete / manual labour)</option>
+          </select>
+        </div>
+        <div class="f" style="margin-bottom:9px;">
+          <label>Goal</label>
+          <select id="tdeeGoal">
+            <option value="maintain" selected>Maintain current weight</option>
+            <option value="loss">Lose fat (moderate deficit)</option>
+            <option value="gain">Gain muscle (moderate surplus)</option>
+          </select>
+        </div>
+        <button class="cbtn" onclick="calcTDEE()">Calculate calorie target</button>
+        <div class="rbox" id="tdeeRes" role="region" aria-live="polite">
+          <div class="rl">Daily calorie target</div>
+          <div class="rv" id="tdeeV">—</div>
+          <div class="re" id="tdeeE"></div>
+        </div>
+      </div>
+
+      <!-- Body Fat -->
+      <div class="ccard">
+        <div class="cnum">BF% · 04</div>
+        <h3>Body Fat Estimate</h3>
+        <p class="cdesc">U.S. Navy circumference method — no calipers. Hip measurement required for female.</p>
+        <div class="seg" id="bfSexSeg" role="group" aria-label="Biological sex">
+          <button class="on" data-v="female" onclick="setSeg('bfSexSeg',this,'bfSex');toggleHip()">Female</button>
+          <button data-v="male" onclick="setSeg('bfSexSeg',this,'bfSex');toggleHip()">Male</button>
+        </div>
+        <div class="fl">
+          <div class="f"><label>Waist (cm)</label><input type="number" id="bfWaist" placeholder="68" inputmode="decimal"></div>
+          <div class="f"><label>Neck (cm)</label><input type="number" id="bfNeck" placeholder="30" inputmode="decimal"></div>
+        </div>
+        <div class="fl">
+          <div class="f" id="hipWrap"><label>Hip (cm)</label><input type="number" id="bfHip" placeholder="92" inputmode="decimal"></div>
+          <div class="f"><label>Height (cm)</label><input type="number" id="bfH" placeholder="160" inputmode="decimal"></div>
+        </div>
+        <button class="cbtn" onclick="calcBF()">Estimate body fat</button>
+        <div class="rbox" id="bfRes" role="region" aria-live="polite">
+          <div class="rl">Estimated body fat</div>
+          <div class="rv" id="bfV">—</div>
+          <div class="rt" id="bfT">—</div>
+        </div>
+      </div>
+
+      <!-- Water -->
+      <div class="ccard">
+        <div class="cnum">H₂O · 05</div>
+        <h3>Daily Water Intake</h3>
+        <p class="cdesc">Personalised hydration target — adjusted for body weight and activity level.</p>
+        <div class="fl">
+          <div class="f"><label>Weight (kg)</label><input type="number" id="wW" placeholder="55" inputmode="decimal"></div>
+          <div class="f">
+            <label>Activity</label>
+            <select id="wAct">
+              <option value="0.03">Low (sedentary)</option>
+              <option value="0.035" selected>Moderate</option>
+              <option value="0.04">High (daily exercise)</option>
+              <option value="0.05">Very high (athlete)</option>
+            </select>
+          </div>
+        </div>
+        <button class="cbtn" onclick="calcWater()">Calculate intake</button>
+        <div class="rbox" id="waterRes" role="region" aria-live="polite">
+          <div class="rl">Daily target</div>
+          <div class="rv" id="waterV">—</div>
+          <div class="rt">litres / day</div>
+          <div class="re" id="waterE"></div>
+        </div>
+      </div>
+
+      <!-- Macros -->
+      <div class="ccard">
+        <div class="cnum">MACRO · 06</div>
+        <h3>Macro Split</h3>
+        <p class="cdesc">Protein, carb and fat grams from your calorie target and body goal.</p>
+        <div class="f" style="margin-bottom:9px;"><label>Daily calories</label><input type="number" id="mCal" placeholder="1800" inputmode="numeric"></div>
+        <div class="f" style="margin-bottom:9px;">
+          <label>Goal</label>
+          <select id="mGoal">
+            <option value="loss">Fat loss (high protein)</option>
+            <option value="maintain" selected>Maintenance (balanced)</option>
+            <option value="muscle">Muscle gain (high carb)</option>
+          </select>
+        </div>
+        <button class="cbtn" onclick="calcMacro()">Split macros</button>
+        <div class="rbox" id="macroRes" role="region" aria-live="polite">
+          <div class="rl">Protein / Carbs / Fat</div>
+          <div class="rv" id="macroV" style="font-size:20px;">—</div>
+          <div class="re" id="macroE"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── GLYCEMIC ── -->
+<section id="glycemic" class="dark-section" style="padding:80px 0 0;">
+  <div class="wrap">
+    <div class="sh">
+      <div class="ey">02 — Searchable database</div>
+      <h2 style="color:var(--panel-fg);">Glycemic index <em style="color:var(--sage);">&amp; load lookup.</em></h2>
+      <p style="color:rgba(251,246,240,.6)">Search any food. See exactly how hard it spikes your blood sugar, and how big that spike is per real serving.</p>
+    </div>
+  </div>
+  <div class="wrap" style="max-width:1200px;">
+    <div class="gi-shell" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);">
+      <div class="gi-top">
+        <div class="gi-search-wrap">
+          <span class="gi-search-icon" aria-hidden="true">🔍</span>
+          <input class="gi-inp" id="giQ" placeholder="Search 289 foods — mango, oats, jaggery, dark chocolate, roti…" autocomplete="off" aria-label="Search glycemic index database">
+        </div>
+      </div>
+      <div class="gi-chips" id="giChips" role="group" aria-label="Filter by category"></div>
+      <div class="gi-meta" id="giMeta" aria-live="polite"></div>
+      <div class="gi-header" aria-hidden="true">
+        <span>Food</span><span style="text-align:center">GI</span><span style="text-align:center">GL</span><span style="text-align:center">Spike level</span>
+      </div>
+      <div class="gi-list" id="giList" role="list"></div>
+    </div>
+  </div>
+  <div style="padding-bottom:80px;"></div>
+</section>
+
+<!-- ── BODY COMP ── -->
+<section id="bodycomp">
+  <div class="wrap">
+    <div class="sh">
+      <div class="ey">03 — Full analysis</div>
+      <h2>Body composition <em>snapshot.</em></h2>
+      <p>Combine your measurements into one readout — and get a routine automatically matched to your goal.</p>
+    </div>
+    <div class="bcg">
+      <div class="bcform">
+        <h3>Your measurements</h3>
+        <p class="sub">All fields needed for a complete analysis.</p>
+        <div class="fl">
+          <div class="f"><label>Age</label><input type="number" id="bcA" placeholder="24"></div>
+          <div class="f"><label>Sex</label><select id="bcSex" onchange="toggleBCHip()"><option value="female">Female</option><option value="male">Male</option></select></div>
+        </div>
+        <div class="fl">
+          <div class="f"><label>Height (cm)</label><input type="number" id="bcH" placeholder="160"></div>
+          <div class="f"><label>Weight (kg)</label><input type="number" id="bcW" placeholder="55"></div>
+        </div>
+        <div class="fl">
+          <div class="f"><label>Waist (cm)</label><input type="number" id="bcWaist" placeholder="68"></div>
+          <div class="f"><label>Neck (cm)</label><input type="number" id="bcNeck" placeholder="30"></div>
+        </div>
+        <div class="fl">
+          <div class="f" id="bcHipWrap"><label>Hip (cm)</label><input type="number" id="bcHip" placeholder="92"></div>
+          <div class="f"><label>Your goal</label>
+            <select id="bcGoal">
+              <option value="lean">Lose fat / lean out</option>
+              <option value="tone" selected>Tone &amp; build muscle</option>
+              <option value="maintain">Maintain &amp; improve fitness</option>
+              <option value="gain">Gain weight / muscle</option>
+            </select>
+          </div>
+        </div>
+        <button class="cbtn" style="padding:12px;" onclick="runBC()">Generate my analysis</button>
+      </div>
+      <div class="bcpanel">
+        <h3>Your readout</h3>
+        <div class="bcph" id="bcPh">Fill in your measurements to see your complete snapshot here.</div>
+        <div id="bcOut" style="display:none;" role="region" aria-live="polite">
+          <div class="bcm"><span class="bcm-l">BMI</span><span class="bcm-v" id="boBMI">—</span></div>
+          <div class="bcm"><span class="bcm-l">Body fat %</span><span class="bcm-v" id="boBF">—</span></div>
+          <div class="bcm"><span class="bcm-l">Lean mass</span><span class="bcm-v" id="boLean">—</span></div>
+          <div class="bcm"><span class="bcm-l">Fat mass</span><span class="bcm-v" id="boFat">—</span></div>
+          <div class="bcm"><span class="bcm-l">Ideal weight range</span><span class="bcm-v" id="boIdeal">—</span></div>
+          <div class="bcm"><span class="bcm-l">BMR</span><span class="bcm-v" id="boBMR">—</span></div>
+          <div class="bcc" id="boChip">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ROUTINES ── -->
+<section id="routines" class="dark-section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="ey">04 — Weekly plan</div>
+      <h2 style="color:var(--panel-fg);">A routine matched <em style="color:var(--gold);">to your goal.</em></h2>
+      <p>Equipment-free, home-friendly, progressive. Changes automatically with your body composition goal, or pick one manually.</p>
+    </div>
+    <div class="fl" style="max-width:360px;margin-bottom:12px;">
+      <div class="f">
+        <label style="color:rgba(255,255,255,.45);">Your goal</label>
+        <select id="rGoal" style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18);color:var(--panel-fg);">
+          <option value="lean">Lose fat / lean out</option>
+          <option value="tone" selected>Tone &amp; build muscle</option>
+          <option value="maintain">Maintain &amp; improve fitness</option>
+          <option value="gain">Gain weight / muscle</option>
+        </select>
+      </div>
+    </div>
+    <button class="cbtn" style="max-width:240px;padding:12px;" onclick="genRoutine()">Generate my weekly plan</button>
+    <div class="rout" id="routOut" role="region" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section id="pricing" class="pastel-section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="ey">05 — Premium</div>
+      <h2>Free tools. <em>Premium layer.</em></h2>
+      <p style="color:var(--muted);">All six calculators are free, forever. The premium tier is a personally-written 22-page PDF plan built around your exact numbers.</p>
+    </div>
+    <div class="pgrid">
+      <div class="pcard">
+        <div class="ptier">Free — Self-serve</div>
+        <h3>The Toolkit</h3>
+        <div class="pamt">₹0 <span>/ forever</span></div>
+        <ul class="plist">
+          <li>BMI, BMR, TDEE, body fat, water &amp; macro calculators</li>
+          <li>Full searchable glycemic index &amp; load database (289 foods)</li>
+          <li>Body composition snapshot with ideal weight range</li>
+          <li>Auto-generated 7-day workout routines</li>
+          <li>Unlimited use, no account required</li>
+        </ul>
+      </div>
+      <div class="pcard feat">
+        <div class="ptier">Premium — Personal</div>
+        <h3>The Codex</h3>
+        <div class="pamt">Custom <span>/ by request</span></div>
+        <ul class="plist">
+          <li>22-page personalised PDF built around your exact numbers and goals</li>
+          <li>Advanced glycemic-load meal sequencing and eating-order protocol</li>
+          <li>Seed cycling calendar mapped to your menstrual cycle phases</li>
+          <li>Metabolism-repair framework with 6-week progressive training arc</li>
+          <li>Anti-glycation skin protocol, supplement and adaptogen notes</li>
+          <li>Direct email access for follow-up questions</li>
+        </ul>
+        <a href="mailto:shuklanandini1308@gmail.com?subject=Vitalmetrik%20Premium%20Plan%20Request" class="btn btn-p" style="width:100%;justify-content:center;margin-top:12px;background:var(--gold2);border-color:var(--gold2);">Request your plan →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section id="about" class="dark-section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="ey">06 — Who built this</div>
+      <h2 style="color:var(--panel-fg);">Built by someone <em style="color:var(--gold);">who uses it.</em></h2>
+    </div>
+    <div class="abg">
+      <div class="acard">
+        <div class="aav">NS</div>
+        <div class="aname">Nandini Shukla</div>
+        <div class="arole">Lifestyle Enthusiast</div>
+        <div class="adiv"></div>
+        <div class="acont">
+          <a href="mailto:shuklanandini1308@gmail.com">shuklanandini1308@gmail.com</a>
+          <a href="#pricing">Request a premium plan →</a>
+        </div>
+      </div>
+      <div class="abody">
+        <p>Vitalmetrik started as a personal project — a single place for every calculator, every glycemic value, and every routine I actually use, instead of having it scattered across a dozen apps and saved screenshots.</p>
+        <p>The free tools here are built to be precise and easy to act on. The premium plans are where the deeper, more specific guidance lives — the kind of detail that only makes sense one-to-one, built around your exact measurements and patterns.</p>
+        <p>If you have questions about your results, or want a plan built fully around you, email is always the fastest way to reach me.</p>
+        <div class="achips">
+          <span class="achip">Lifestyle Enthusiast</span>
+          <span class="achip">Built by Nandini Shukla</span>
+          <span class="achip">shuklanandini1308@gmail.com</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fg">
+      <div>
+        <div class="fbrand">Vital<span>metrik</span></div>
+        <p class="ftag">Precision wellness calculators, glycemic index database and body composition tools — built by Nandini Shukla.</p>
+      </div>
+      <div class="fcol">
+        <h4>Tools</h4>
+        <a href="#calculators">Calculators</a>
+        <a href="#glycemic">Glycemic Index</a>
+        <a href="#bodycomp">Body Composition</a>
+        <a href="#routines">Routines</a>
+      </div>
+      <div class="fcol">
+        <h4>Contact</h4>
+        <a href="mailto:shuklanandini1308@gmail.com">shuklanandini1308@gmail.com</a>
+        <a href="#pricing">Premium plans</a>
+        <a href="#about">About Nandini</a>
+      </div>
+    </div>
+    <div class="fbot">
+      <span>© 2026 Vitalmetrik · Built by Nandini Shukla, Lifestyle Enthusiast</span>
+      <span>Educational tool — not a substitute for medical advice</span>
+    </div>
+  </div>
+</footer>
+
+<script src="gi-data.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const S={bmiUnit:'metric',bmrSex:'female',bfSex:'female',lastBMR:null};
+let currentGender='female';
+
+// ── Gender switch ──────────────────────────────────────────────────────────
+function pick(g){
+  setG(g);
+  const gate=document.getElementById('gate');
+  gate.classList.add('away');
+  setTimeout(()=>{gate.style.display='none';},560);
+}
+
+function setG(g){
+  currentGender=g;
+  const body=document.body;
+  const isMale=g==='male';
+  body.classList.toggle('male',isMale);
+  document.getElementById('gf').classList.toggle('on',!isMale);
+  document.getElementById('gm').classList.toggle('on',isMale);
+
+  // Hero text
+  document.getElementById('h-ey').textContent=isMale?'Calibrated for him':'Calibrated for her';
+  document.getElementById('h-h1').innerHTML=isMale?'Track your gains. <em>Fuel your machine.</em>':'Read your body like an <em>instrument panel.</em>';
+  document.getElementById('h-lede').textContent=isMale
+    ?'Every essential metric — BMI, BMR, body fat, calorie targets, macros — built for a man\'s physiology. Precise, actionable, free.'
+    :'Every essential wellness number — BMI, BMR, body fat, glycemic load, macros — explained in one place. Free, precise, and built for real life.';
+
+  // Auto-set sex segs
+  const bmrBtns=document.querySelectorAll('#bmrSexSeg button');
+  bmrBtns.forEach((b,i)=>{b.classList.toggle('on',(isMale&&i===1)||(!isMale&&i===0));});
+  S.bmrSex=isMale?'male':'female';
+
+  const bfBtns=document.querySelectorAll('#bfSexSeg button');
+  bfBtns.forEach((b,i)=>{b.classList.toggle('on',(isMale&&i===1)||(!isMale&&i===0));});
+  S.bfSex=isMale?'male':'female';
+  toggleHip();
+
+  // BC sex
+  document.getElementById('bcSex').value=isMale?'male':'female';
+  toggleBCHip();
+}
+
+// ── Segmented controls ─────────────────────────────────────────────────────
+function setSeg(segId,btn,key){
+  document.querySelectorAll('#'+segId+' button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  S[key]=btn.getAttribute('data-v');
+  if(key==='bmiUnit'){
+    const imp=S.bmiUnit==='imperial';
+    document.getElementById('bmiHLbl').textContent=imp?'Height (inches)':'Height (cm)';
+    document.getElementById('bmiWLbl').textContent=imp?'Weight (lbs)':'Weight (kg)';
+    document.getElementById('bmiH').placeholder=imp?'63':'160';
+    document.getElementById('bmiW').placeholder=imp?'130':'55';
+    document.getElementById('bmiHint').style.display=imp?'block':'none';
+  }
+}
+
+// ── Hip toggle ─────────────────────────────────────────────────────────────
+function toggleHip(){
+  document.getElementById('hipWrap').style.display=S.bfSex==='male'?'none':'';
+}
+function toggleBCHip(){
+  const isMale=document.getElementById('bcSex').value==='male';
+  document.getElementById('bcHipWrap').style.display=isMale?'none':'';
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function n(id){return parseFloat(document.getElementById(id).value)||0;}
+function show(id){const el=document.getElementById(id);el.classList.add('on');}
+function err(msg){alert('⚠️ '+msg);}
+
+function bmiStatus(bmi){
+  if(bmi<16)  return{tag:'Severely underweight',col:'#FF8070'};
+  if(bmi<18.5)return{tag:'Underweight',col:'#FFD070'};
+  if(bmi<25)  return{tag:'Normal range',col:'#80E09A'};
+  if(bmi<30)  return{tag:'Overweight',col:'#FFD070'};
+  if(bmi<35)  return{tag:'Obese (Class I)',col:'#FF9070'};
+  return{tag:'Obese (Class II+)',col:'#FF6060'};
+}
+
+function bfStatus(bf,sex){
+  if(sex==='female'){
+    if(bf<13) return{tag:'Essential fat — very low',col:'#FFD070'};
+    if(bf<21) return{tag:'Athletic range',col:'#80E09A'};
+    if(bf<25) return{tag:'Fitness range',col:'#80E09A'};
+    if(bf<32) return{tag:'Acceptable range',col:'#FFD070'};
+    return{tag:'Above typical range',col:'#FF8070'};
+  }
+  if(bf<5)  return{tag:'Essential fat — very low',col:'#FFD070'};
+  if(bf<13) return{tag:'Athletic range',col:'#80E09A'};
+  if(bf<18) return{tag:'Fitness range',col:'#80E09A'};
+  if(bf<25) return{tag:'Acceptable range',col:'#FFD070'};
+  return{tag:'Above typical range',col:'#FF8070'};
+}
+
+// ── BMI ───────────────────────────────────────────────────────────────────
+function calcBMI(){
+  let h=n('bmiH'),w=n('bmiW');
+  if(!h||!w){err('Please enter both height and weight.');return;}
+  if(S.bmiUnit==='imperial'){
+    h=h*2.54;  // inches → cm
+    w=w*0.453592; // lbs → kg
+  }
+  if(h<100||h>250){err('Height seems off — check your entry (cm for metric, inches for imperial).');return;}
+  if(w<20||w>300){err('Weight seems off — check your entry.');return;}
+  const bmi=w/((h/100)**2);
+  const{tag,col}=bmiStatus(bmi);
+  document.getElementById('bmiV').textContent=bmi.toFixed(1);
+  const t=document.getElementById('bmiT');
+  t.textContent=tag;t.style.color=col;
+  const hw=h/100;
+  document.getElementById('bmiE').textContent=
+    `Healthy weight for your height: ${(18.5*hw*hw).toFixed(0)}–${(24.9*hw*hw).toFixed(0)} kg`;
+  show('bmiRes');
+}
+
+// ── BMR ───────────────────────────────────────────────────────────────────
+function calcBMR(){
+  const age=n('bmrA'),h=n('bmrH'),w=n('bmrW');
+  if(!age||!h||!w){err('Please enter age, height and weight.');return;}
+  if(age<10||age>120){err('Please enter a realistic age.');return;}
+  if(h<100||h>250){err('Please enter height in cm (e.g. 165).');return;}
+  if(w<20||w>300){err('Please enter weight in kg (e.g. 60).');return;}
+  const bmr=Math.round(10*w+6.25*h-5*age+(S.bmrSex==='male'?5:-161));
+  S.lastBMR=bmr;
+  document.getElementById('bmrV').textContent=bmr.toLocaleString();
+  show('bmrRes');
+}
+
+// ── TDEE ──────────────────────────────────────────────────────────────────
+function calcTDEE(){
+  if(!S.lastBMR){err('Calculate your BMR first using the card above.');return;}
+  const mult=parseFloat(document.getElementById('tdeeAct').value);
+  const goal=document.getElementById('tdeeGoal').value;
+  const maint=Math.round(S.lastBMR*mult);
+  let target=maint;
+  let note='';
+  if(goal==='loss'){target=maint-450;note=`Maintenance: ${maint.toLocaleString()} kcal · Deficit: −450 kcal`;}
+  else if(goal==='gain'){target=maint+350;note=`Maintenance: ${maint.toLocaleString()} kcal · Surplus: +350 kcal`;}
+  else{note=`This is your maintenance — eating this keeps weight stable.`;}
+  document.getElementById('tdeeV').textContent=target.toLocaleString()+' kcal';
+  document.getElementById('tdeeE').textContent=note;
+  show('tdeeRes');
+}
+
+// ── BODY FAT ──────────────────────────────────────────────────────────────
+function calcBF(){
+  const waist=n('bfWaist'),neck=n('bfNeck'),h=n('bfH'),hip=n('bfHip');
+  if(!waist||!neck||!h){err('Please fill in waist, neck and height.');return;}
+  if(waist<=neck){err('Waist measurement must be larger than neck. Please re-check your values.');return;}
+  if(S.bfSex==='female'&&!hip){err('Hip measurement is required for female body fat estimate.');return;}
+  let bf;
+  if(S.bfSex==='male'){
+    const diff=waist-neck;
+    if(diff<=0){err('Waist must be greater than neck.');return;}
+    bf=495/(1.0324-0.19077*Math.log10(diff)+0.15456*Math.log10(h))-450;
+  }else{
+    const sum=waist+hip-neck;
+    if(sum<=0){err('Please check your measurements.');return;}
+    bf=495/(1.29579-0.35004*Math.log10(sum)+0.22100*Math.log10(h))-450;
+  }
+  if(isNaN(bf)||!isFinite(bf)){err('Could not calculate — please double-check your measurements are in cm.');return;}
+  bf=Math.max(3,Math.min(60,bf));
+  document.getElementById('bfV').textContent=bf.toFixed(1)+'%';
+  const{tag,col}=bfStatus(bf,S.bfSex);
+  const t=document.getElementById('bfT');t.textContent=tag;t.style.color=col;
+  show('bfRes');
+}
+
+// ── WATER ─────────────────────────────────────────────────────────────────
+function calcWater(){
+  const w=n('wW');
+  if(!w||w<20||w>300){err('Please enter a valid weight in kg.');return;}
+  const mult=parseFloat(document.getElementById('wAct').value);
+  const L=(w*mult).toFixed(1);
+  const cups=Math.round(w*mult/0.25);
+  document.getElementById('waterV').textContent=L+' L';
+  document.getElementById('waterE').textContent=`That's approximately ${cups} cups / glasses per day. Sip throughout — never gulp large amounts at once.`;
+  show('waterRes');
+}
+
+// ── MACROS ────────────────────────────────────────────────────────────────
+function calcMacro(){
+  const cals=n('mCal');
+  if(!cals||cals<500||cals>6000){err('Please enter a realistic daily calorie amount (500–6000).');return;}
+  const goal=document.getElementById('mGoal').value;
+  let p,c,f;
+  if(goal==='loss')  {p=.40;c=.30;f=.30;}
+  else if(goal==='muscle'){p=.30;c=.45;f=.25;}
+  else               {p=.30;c=.40;f=.30;}
+  const pg=Math.round(cals*p/4),cg=Math.round(cals*c/4),fg=Math.round(cals*f/9);
+  document.getElementById('macroV').textContent=`${pg}g / ${cg}g / ${fg}g`;
+  document.getElementById('macroE').innerHTML=
+    `Protein: ${pg}g (${Math.round(p*100)}%)&nbsp;&nbsp;Carbs: ${cg}g (${Math.round(c*100)}%)&nbsp;&nbsp;Fat: ${fg}g (${Math.round(f*100)}%)`;
+  show('macroRes');
+}
+
+// ── GI DATABASE ───────────────────────────────────────────────────────────
+const ALL_CATS=['All',...new Set(GI_DATABASE.map(f=>f.cat))];
+const chipsEl=document.getElementById('giChips');
+let activeCat='All';
+
+ALL_CATS.forEach(cat=>{
+  const b=document.createElement('button');
+  b.className='gi-chip'+(cat==='All'?' on':'');
+  b.textContent=cat;
+  b.setAttribute('aria-pressed',cat==='All'?'true':'false');
+  b.onclick=()=>{
+    activeCat=cat;
+    chipsEl.querySelectorAll('.gi-chip').forEach(c=>{c.classList.remove('on');c.setAttribute('aria-pressed','false');});
+    b.classList.add('on');b.setAttribute('aria-pressed','true');
+    renderGI();
+  };
+  chipsEl.appendChild(b);
+});
+
+function giColor(gi){
+  if(gi===0)return'#80E09A';
+  if(gi<=55)return'#80E09A';
+  if(gi<=69)return'#FFCA50';
+  return'#FF8070';
+}
+function giBadge(gi){
+  if(gi===0)return{cls:'lo',txt:'N/A'};
+  if(gi<=55)return{cls:'lo',txt:'LOW'};
+  if(gi<=69)return{cls:'me',txt:'MED'};
+  return{cls:'hi',txt:'HIGH'};
+}
+
+function renderGI(){
+  const q=document.getElementById('giQ').value.trim().toLowerCase();
+  let res=GI_DATABASE.filter(f=>
+    (activeCat==='All'||f.cat===activeCat)&&
+    (!q||f.n.toLowerCase().includes(q)||f.cat.toLowerCase().includes(q))
+  ).sort((a,b)=>a.n.localeCompare(b.n));
+  document.getElementById('giMeta').textContent=
+    `Showing ${res.length} of ${GI_DATABASE.length} foods${q?' matching "'+q+'"':''}`;
+  const list=document.getElementById('giList');
+  if(!res.length){list.innerHTML='<div class="gi-empty">No matches — try a different term or clear the filter.</div>';return;}
+  list.innerHTML=res.map(f=>{
+    const{cls,txt}=giBadge(f.gi);
+    const col=giColor(f.gi);
+    const pct=f.gi===0?5:Math.round(f.gi);
+    return `<div class="gi-row" role="listitem">
+      <div><div class="gi-name">${f.n}</div><div class="gi-cat">${f.cat} · ${f.serv}</div></div>
+      <div class="gi-num">
+        <div class="gi-num-v" style="color:${col}">${f.gi}</div>
+        <div class="gi-bar-bg"><div class="gi-bar-fill" style="width:${pct}%;background:${col};"></div></div>
+        <div class="gi-num-u">GI</div>
+      </div>
+      <div class="gi-num">
+        <div class="gi-num-v">${f.gl}</div>
+        <div class="gi-num-u">GL</div>
+      </div>
+      <div><span class="gib ${cls}">${txt}</span></div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('giQ').addEventListener('input',renderGI);
+renderGI();
+
+// ── BODY COMP ─────────────────────────────────────────────────────────────
+function runBC(){
+  const age=n('bcA'),h=n('bcH'),w=n('bcW'),waist=n('bcWaist'),neck=n('bcNeck'),hip=n('bcHip');
+  const sex=document.getElementById('bcSex').value;
+  const goal=document.getElementById('bcGoal').value;
+  if(!age||!h||!w||!waist||!neck){err('Please fill in age, height, weight, waist and neck.');return;}
+  if(sex==='female'&&!hip){err('Hip measurement is needed for female body fat estimate.');return;}
+  if(waist<=neck){err('Waist must be larger than neck. Please re-check your values.');return;}
+
+  const hw=h/100;
+  const bmi=w/(hw*hw);
+
+  let bf;
+  if(sex==='male'){
+    const diff=waist-neck;
+    if(diff<=0){err('Waist must be greater than neck.');return;}
+    bf=495/(1.0324-0.19077*Math.log10(diff)+0.15456*Math.log10(h))-450;
+  }else{
+    const sum=waist+hip-neck;
+    if(sum<=0){err('Please check your measurements.');return;}
+    bf=495/(1.29579-0.35004*Math.log10(sum)+0.22100*Math.log10(h))-450;
+  }
+  if(isNaN(bf)||!isFinite(bf)){err('Could not calculate body fat — please double-check measurements are in cm.');return;}
+  bf=Math.max(3,Math.min(60,bf));
+
+  const fat=w*(bf/100),lean=w-fat;
+  const bmr=Math.round(10*w+6.25*h-5*age+(sex==='male'?5:-161));
+  const lo=(18.5*hw*hw).toFixed(0),hi=(24.9*hw*hw).toFixed(0);
+
+  document.getElementById('boBMI').textContent=bmi.toFixed(1);
+  document.getElementById('boBF').textContent=bf.toFixed(1)+'%';
+  document.getElementById('boLean').textContent=lean.toFixed(1)+' kg';
+  document.getElementById('boFat').textContent=fat.toFixed(1)+' kg';
+  document.getElementById('boIdeal').textContent=`${lo}–${hi} kg`;
+  document.getElementById('boBMR').textContent=bmr.toLocaleString()+' kcal';
+  const chips={lean:'→ Fat-loss routine recommended',tone:'→ Tone & build routine recommended',maintain:'→ Maintenance routine recommended',gain:'→ Muscle-gain routine recommended'};
+  document.getElementById('boChip').textContent=chips[goal];
+  document.getElementById('bcPh').style.display='none';
+  const out=document.getElementById('bcOut');
+  out.style.display='block';out.style.animation='slideIn .3s ease';
+  document.getElementById('rGoal').value=goal;
+}
+
+// ── ROUTINES ──────────────────────────────────────────────────────────────
+const PLANS={
+  lean:{t:'Fat-Loss Focus — 6 days, no equipment',days:[
+    ['Monday','Cardio + Lower Body','20 min brisk walk or jog · 3×20 squats · 3×15 reverse lunges/leg · 3×15 glute bridges'],
+    ['Tuesday','HIIT Circuit','4 rounds: 30s burpees → 30s mountain climbers → 30s jumping jacks → 30s rest'],
+    ['Wednesday','Core + Upper Body','3×15 push-ups (knee ok) · 3×30s plank · 3×20 bicycle crunches · 3×15 tricep dips on chair'],
+    ['Thursday','Active Recovery','25 min yoga or stretching · 10 min gentle walk'],
+    ['Friday','Full Body HIIT','4 rounds: squat jumps → push-ups → high knees → plank hold — 30s each, 15s rest'],
+    ['Saturday','Steady Cardio','35 min brisk walk + 15 min core finisher (leg raises, reverse crunches, side plank)'],
+    ['Sunday','Rest','Complete rest. Prioritise sleep, hydration and protein intake today.'],
+  ]},
+  tone:{t:'Tone & Build — 6 days, no equipment',days:[
+    ['Monday','Lower Body','3×30 squats · 3×20 reverse lunges/leg · 3×15 glute bridges · 3×20 donkey kicks/leg · 1 min wall sit'],
+    ['Tuesday','Cardio + Core','3 rounds: 2 min jog in place → 20 mountain climbers → 15 bicycle crunches → 30s plank'],
+    ['Wednesday','Upper Body','3×15 push-ups · 3×20 tricep dips · 3×15 shoulder taps · 3×30s plank → 10 wide push-ups'],
+    ['Thursday','Yoga + Stretch','25 min mobility — cat-cow, child\'s pose, hip flexor stretch, seated twist, legs up the wall'],
+    ['Friday','Full Body HIIT','4 rounds: burpees × 10 · squat jumps × 15 · push-ups × 12 · high knees 30s · plank 45s'],
+    ['Saturday','Walk + Core','30 min walk · 3×20 leg raises · 3×15 reverse crunches · 3×30s side plank/side'],
+    ['Sunday','Rest','Full rest day. Light stretching only. This is when muscle actually grows.'],
+  ]},
+  maintain:{t:'Maintenance & Fitness — 5 days, no equipment',days:[
+    ['Monday','Full Body Strength','3×15 squats · 3×12 push-ups · 3×15 glute bridges · 3×30s plank'],
+    ['Tuesday','Cardio','25–30 min walk, jog, dance, or any movement you genuinely enjoy'],
+    ['Wednesday','Mobility + Core','20 min yoga flow + 3×20 bicycle crunches + 3×30s side plank/side'],
+    ['Thursday','Strength','3×15 lunges/leg · 3×15 tricep dips · 3×20 mountain climbers · 3×12 push-ups'],
+    ['Friday','Light Cardio + Stretch','20 min walk + full body stretching — hold each stretch 30–45s'],
+    ['Saturday','Optional Active Day','Sport, swim, hike, dance — any activity that moves you and feels good'],
+    ['Sunday','Rest','Full rest day'],
+  ]},
+  gain:{t:'Muscle Gain — 5 days, progressive overload focus',days:[
+    ['Monday','Lower Body','4×20 squats (3s down, 1s hold) · 4×15 lunges/leg · 4×15 glute bridges · 4×12 step-ups'],
+    ['Tuesday','Upper Body','4×15 push-ups · 4×20 tricep dips · 4×12 pike push-ups · 4×15 shoulder taps'],
+    ['Wednesday','Rest / Recovery','Light walk + stretching. Today focus on hitting protein target — muscle grows here.'],
+    ['Thursday','Full Body Volume','3 rounds high-rep: squats × 25 · push-ups × 20 · glute bridges × 20 · plank 60s'],
+    ['Friday','Core + Stability','4×20 leg raises · 4×45s plank · 4×15 reverse crunches · 4×30s side plank/side'],
+    ['Saturday','Progressive Load','Increase reps 10–15% from Monday. Log your numbers each week.'],
+    ['Sunday','Full Rest','Non-negotiable rest. Growth hormone peaks during sleep.'],
+  ]}
+};
+
+function genRoutine(){
+  const goal=document.getElementById('rGoal').value;
+  const{t,days}=PLANS[goal];
+  const el=document.getElementById('routOut');
+  el.innerHTML=`<div class="rout-h">${t}</div>`+
+    days.map(([d,f,m],i)=>`<div class="rday" style="animation-delay:${i*40}ms"><div class="rday-d">${d}</div><div><div class="rday-f">${f}</div><div class="rday-m">${m}</div></div></div>`).join('');
+  el.classList.add('on');
+  setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+// ── Mobile nav ─────────────────────────────────────────────────────────────
+const ham=document.getElementById('ham'),nl=document.getElementById('nl');
+ham.addEventListener('click',()=>{
+  const open=nl.classList.toggle('open');
+  ham.setAttribute('aria-expanded',open);
+  ham.textContent=open?'✕':'☰';
+});
+nl.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+  nl.classList.remove('open');ham.setAttribute('aria-expanded','false');ham.textContent='☰';
+}));
+
+// ── Scroll progress bar ───────────────────────────────────────────────────
+const sp = document.getElementById('sp');
+window.addEventListener('scroll', () => {
+  const p = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  sp.style.width = Math.min(100, p * 100) + '%';
+}, {passive: true});
+
+// ── Fun facts toast ───────────────────────────────────────────────────────
+const FACTS = [
+  'Eating fibre first can cut your post-meal glucose spike by up to 40%.',
+  'Muscle tissue burns ~6 kcal/kg/day at rest — more muscle = faster metabolism.',
+  'Cooled and reheated rice has a measurably lower glycaemic load than freshly cooked hot rice.',
+  'Walking for just 10 minutes after a meal significantly reduces blood sugar spikes.',
+  'Soaking chia seeds in water before eating creates a gel layer that slows carb absorption.',
+  'Dark chocolate (70%+) has a GI of just 23 — lower than most breakfast cereals.',
+  'The body's cortisol is highest in the morning, making glucose more reactive before 10am.',
+  'Methi (fenugreek) seeds improve insulin sensitivity over weeks of consistent daily use.',
+  'Eating protein at every meal triggers the thermic effect — digesting protein burns calories too.',
+  'Glycation — sugar binding to collagen — is one of the key drivers of visible skin ageing.',
+];
+let factShown = false;
+window.addEventListener('scroll', () => {
+  if (!factShown && window.scrollY > 400) {
+    factShown = true;
+    const ff = document.getElementById('funfact');
+    const txt = document.getElementById('fftxt');
+    txt.textContent = FACTS[Math.floor(Math.random() * FACTS.length)];
+    ff.classList.add('show');
+    setTimeout(() => ff.classList.remove('show'), 5500);
+  }
+}, {passive: true, once: false});
+// Cycle facts on click
+document.getElementById('funfact').addEventListener('click', () => {
+  const txt = document.getElementById('fftxt');
+  txt.textContent = FACTS[Math.floor(Math.random() * FACTS.length)];
+  document.getElementById('funfact').classList.add('show');
+  setTimeout(() => document.getElementById('funfact').classList.remove('show'), 5500);
+});
+
+// ── Stagger routine days ──────────────────────────────────────────────────
+const _origGenRoutine = genRoutine;
+genRoutine = function() {
+  _origGenRoutine();
+  document.querySelectorAll('.rday').forEach((el, i) => {
+    el.style.animationDelay = i * 55 + 'ms';
+  });
+};
+
+// ── GI bar width as CSS var for animation ────────────────────────────────
+function renderGIExtras() {
+  document.querySelectorAll('.gi-bar-fill').forEach(el => {
+    const w = el.style.width;
+    el.style.setProperty('--w', w);
+    el.style.width = '';
+    void el.offsetWidth;
+    el.style.width = w;
+  });
+}
+// Patch renderGI to call extras after
+const _origRender = renderGI;
+renderGI = function() {
+  _origRender();
+  setTimeout(renderGIExtras, 10);
+};
+renderGI();
+
+// ── Easter egg: Konami code → confetti burst ─────────────────────────────
+const KONAMI = [38,38,40,40,37,39,37,39,66,65];
+let ki = 0;
+document.addEventListener('keydown', e => {
+  if (e.keyCode === KONAMI[ki]) { ki++; if (ki === KONAMI.length) { burst(); ki = 0; } }
+  else ki = 0;
+});
+function burst() {
+  const colors = ['#D4A0AB','#C9A769','#A8BCA2','#E2DCEF','#F3DEE2'];
+  for (let i = 0; i < 60; i++) {
+    const d = document.createElement('div');
+    d.style.cssText = `position:fixed;top:${Math.random()*60+20}%;left:${Math.random()*100}%;width:8px;height:8px;border-radius:50%;background:${colors[i%colors.length]};pointer-events:none;z-index:9000;animation:confetti${i} 1.2s ease forwards;`;
+    document.body.appendChild(d);
+    const kf = `@keyframes confetti${i}{from{transform:translateY(0) rotate(0)}to{transform:translateY(${200+Math.random()*200}px) rotate(${360+Math.random()*360}deg);opacity:0}}`;
+    const s = document.createElement('style'); s.textContent = kf; document.head.appendChild(s);
+    setTimeout(() => { d.remove(); s.remove(); }, 1300);
+  }
+}
+</script>
+</body>
+</html>
